@@ -1157,6 +1157,31 @@
     white-space: pre-wrap;
   }
 
+  /* ── Prática: Botões de modo ─────────────────────────────────── */
+  .practice-mode-btn {
+    padding: 14px 20px;
+    background: linear-gradient(135deg, var(--sky), #20A0A8);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(78,205,196,0.3);
+    min-width: 180px;
+  }
+
+  .practice-mode-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(78,205,196,0.5);
+  }
+
+  .practice-mode-btn:active {
+    transform: translateY(-1px);
+  }
+
   /* ── Tela 3: Botões de adaptação ─────────────────────────────── */
   .adapt-btn-grid {
     display: grid;

@@ -9,6 +9,11 @@ let quizAnswers = {};
 let quizCorrect = 0;
 let quizTotal = 0;
 
+// ─── Modo Prática ───────────────────────────────────────────────────────────
+let currentExercises = [];
+let currentQuiz = [];
+let practiceMode = null; // 'exercises' ou 'quiz'
+
 // Grade buttons
 document.querySelectorAll('.grade-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -95,6 +100,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── Botões de Modo de Prática ──────────────────────────────────────────────
+document.querySelectorAll('.practice-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.dataset.mode;
+    switchPracticeMode(mode);
   });
 });
 
@@ -190,6 +203,9 @@ function renderResults(data) {
   // Show results
   document.getElementById('uploadCard').style.display = 'none';
   document.getElementById('results').style.display = 'block';
+
+  // Salvar dados para modo prática
+  saveAnalysisData(data);
 
   // Render explanation
   renderExplanation(data.explicacao, data.topico);
@@ -430,6 +446,26 @@ function addStar() {
   badge.style.transform = 'scale(1.2)';
   setTimeout(() => badge.style.transform = 'scale(1)', 300);
   badge.style.transition = 'transform 0.3s ease';
+}
+
+// ─── Modo Prática: Alternar entre exercícios e quiz ──────────────────────────
+function switchPracticeMode(mode) {
+  practiceMode = mode;
+  const practiceContainer = document.getElementById('practiceContent');
+  
+  if (mode === 'exercises') {
+    renderExercises(currentExercises);
+    practiceContainer.innerHTML = document.getElementById('exercisesContent').innerHTML;
+  } else if (mode === 'quiz') {
+    renderQuiz(currentQuiz);
+    practiceContainer.innerHTML = document.getElementById('quizContent').innerHTML;
+  }
+}
+
+// ─── Salvar dados de análise para modo prática ───────────────────────────────
+function saveAnalysisData(data) {
+  currentExercises = data.exercicios || [];
+  currentQuiz = data.quiz || [];
 }
 
 // ─── Salvar PDF ───────────────────────────────────────────────────────────────
