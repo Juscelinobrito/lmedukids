@@ -6,6 +6,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/adapt.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "frontend/**",
       "use": "@vercel/static"
     }
@@ -15,6 +19,11 @@
       "src": "/api/messages",
       "dest": "/api/messages.js"
     },
+    {
+      "src": "/api/adapt",
+      "dest": "/api/adapt.js"
+    },
+
     {
       "src": "/health",
       "dest": "/api/messages.js"

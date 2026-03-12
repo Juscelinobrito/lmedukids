@@ -40,145 +40,336 @@
   </div>
 </header>
 
-<div class="container">
-  <!-- Hero -->
-  <div class="hero">
-    <div class="lunna-hero">
-      <img src="lunna.png" alt="Lunna" class="lunna-hero-img">
-      <div class="lunna-speech">Oi! Eu sou a <strong>Lunna</strong>! 🌟<br>Vou te ajudar a aprender!</div>
-    </div>
-    <h1 class="hero-title">
-      Tire foto da tarefa<br>e <span class="highlight">aprenda brincando!</span>
-    </h1>
-    <p class="hero-desc">
-      A IA vai explicar o assunto de um jeito fácil e criar exercícios especiais só para você! 🎉
-    </p>
-  </div>
-
-  <!-- Upload Card -->
-  <div class="upload-card" id="uploadCard">
-    <div class="upload-card-title">
-      📷 Enviar foto da tarefa
-    </div>
-
-    <!-- Grade selector -->
-    <div class="grade-label">🎒 Qual é a sua série?</div>
-    <div class="grade-row">
-      <button class="grade-btn active" data-grade="1">1º ano</button>
-      <button class="grade-btn" data-grade="2">2º ano</button>
-      <button class="grade-btn" data-grade="3">3º ano</button>
-      <button class="grade-btn" data-grade="4">4º ano</button>
-      <button class="grade-btn" data-grade="5">5º ano</button>
-    </div>
-
-    <br>
-    <!-- Hidden file inputs -->
-    <input type="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none">
-    <input type="file" id="fileInputGallery" accept="image/*,application/pdf" style="display:none">
-
-    <!-- Upload zone -->
-    <div class="upload-zone" id="uploadZone">
-      <span class="upload-icon">🖼️</span>
-      <div class="upload-text">Como deseja enviar a tarefa?</div>
-      <div class="upload-subtext" style="margin-bottom:20px">Foto do livro, caderno ou folha de exercício</div>
-      <div class="upload-btn-row">
-        <button class="upload-choice-btn camera-btn" id="cameraBtn">
-          <span class="choice-icon">📷</span>
-          <span class="choice-label">Tirar Foto</span>
-          <span class="choice-sub">Câmera</span>
-        </button>
-        <button class="upload-choice-btn gallery-btn" id="galleryBtn">
-          <span class="choice-icon">🖼️</span>
-          <span class="choice-label">Escolher Arquivo</span>
-          <span class="choice-sub">Galeria ou Pasta</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Image preview -->
-    <div class="preview-container" id="previewContainer">
-      <img id="previewImage" src="" alt="Foto da tarefa">
-      <button class="remove-btn" id="removeBtn" title="Remover foto">✕</button>
-    </div>
-
-    <button class="analyze-btn" id="analyzeBtn" disabled>
-      <span id="btnIcon">🔍</span>
-      <span id="btnText">Envie uma foto primeiro</span>
+<!-- ── Seletor de Modo ──────────────────────────────────────────── -->
+<div class="mode-switcher-wrap">
+  <div class="mode-switcher" id="modeSwitcher">
+    <button class="mode-btn active" id="btnModeAluno" data-mode="aluno">
+      🎒 <span>Modo Aluno</span>
     </button>
-  </div>
-
-  <!-- Results -->
-  <div id="results">
-    <div class="results-header">
-      <div class="results-title">✨ Ótimo! Aqui está sua aula!</div>
-    </div>
-
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="explanation">📖 Explicação</button>
-      <button class="tab-btn" data-tab="exercises">✏️ Exercícios</button>
-      <button class="tab-btn" data-tab="quiz">🎮 Quiz</button>
-      <button class="tab-btn" data-tab="tips">💡 Dicas</button>
-    </div>
-
-    <!-- Explanation Tab -->
-    <div class="tab-content active" id="tab-explanation">
-      <div class="content-card sky">
-        <div class="content-card-accent"></div>
-        <div class="content-card-title">🌟 O que você vai aprender</div>
-        <div class="content-body" id="explanationContent">
-          Carregando...
-        </div>
-      </div>
-    </div>
-
-    <!-- Exercises Tab -->
-    <div class="tab-content" id="tab-exercises">
-      <div class="content-card coral">
-        <div class="content-card-accent"></div>
-        <div class="content-card-title">✏️ Praticando o que aprendeu</div>
-        <div id="exercisesContent"></div>
-      </div>
-    </div>
-
-    <!-- Quiz Tab -->
-    <div class="tab-content" id="tab-quiz">
-      <div class="content-card purple">
-        <div class="content-card-accent"></div>
-        <div class="content-card-title">🎮 Quiz Divertido</div>
-        <div id="quizScore" style="display:none" class="score-badge">🏆 Pontuação: <span id="scoreText">0/0</span></div>
-        <div id="quizContent"></div>
-      </div>
-    </div>
-
-    <!-- Tips Tab -->
-    <div class="tab-content" id="tab-tips">
-      <div class="content-card sun">
-        <div class="content-card-accent"></div>
-        <div class="content-card-title">💡 Dicas para os Pais</div>
-        <div id="tipsContent"></div>
-      </div>
-    </div>
-
-    <div class="stars-reward" id="starsReward" style="display:none">
-      <div class="reward-stars" id="rewardStars">⭐⭐⭐</div>
-      <div class="reward-text" id="rewardText">Você é incrível! Continue assim!</div>
-    </div>
-
-    <!-- PDF + New task buttons -->
-    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
-      <button class="analyze-btn" id="savePdfBtn" style="background: linear-gradient(135deg, #F093FB, #F5576C); box-shadow: 0 6px 24px rgba(240,147,251,0.4); flex:1; min-width:200px;">
-        📄 Salvar como PDF
-      </button>
-      <button class="analyze-btn" id="newTaskBtn" style="background: linear-gradient(135deg, var(--sky), #38B2AC); box-shadow: 0 6px 24px rgba(78,205,196,0.4); flex:1; min-width:200px;">
-        📷 Analisar nova tarefa
-      </button>
-    </div>
+    <button class="mode-btn" id="btnModeProfessor" data-mode="professor">
+      👩‍🏫 <span>Modo Professor</span>
+    </button>
   </div>
 </div>
 
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  MODO ALUNO                                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="modoAluno">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="lunna-hero">
+        <img src="lunna.png" alt="Lunna" class="lunna-hero-img">
+        <div class="lunna-speech">Oi! Eu sou a <strong>Lunna</strong>! 🌟<br>Vou te ajudar a aprender!</div>
+      </div>
+      <h1 class="hero-title">
+        Tire foto da tarefa<br>e <span class="highlight">aprenda brincando!</span>
+      </h1>
+      <p class="hero-desc">
+        A IA vai explicar o assunto de um jeito fácil e criar exercícios especiais só para você! 🎉
+      </p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="upload-card" id="uploadCard">
+      <div class="upload-card-title">
+        📷 Enviar foto da tarefa
+      </div>
+
+      <div class="grade-label">🎒 Qual é a sua série?</div>
+      <div class="grade-row">
+        <button class="grade-btn active" data-grade="1">1º ano</button>
+        <button class="grade-btn" data-grade="2">2º ano</button>
+        <button class="grade-btn" data-grade="3">3º ano</button>
+        <button class="grade-btn" data-grade="4">4º ano</button>
+        <button class="grade-btn" data-grade="5">5º ano</button>
+      </div>
+
+      <br>
+      <input type="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="fileInputGallery" accept="image/*,application/pdf" style="display:none">
+
+      <div class="upload-zone" id="uploadZone">
+        <span class="upload-icon">🖼️</span>
+        <div class="upload-text">Como deseja enviar a tarefa?</div>
+        <div class="upload-subtext" style="margin-bottom:20px">Foto do livro, caderno ou folha de exercício</div>
+        <div class="upload-btn-row">
+          <button class="upload-choice-btn camera-btn" id="cameraBtn">
+            <span class="choice-icon">📷</span>
+            <span class="choice-label">Tirar Foto</span>
+            <span class="choice-sub">Câmera</span>
+          </button>
+          <button class="upload-choice-btn gallery-btn" id="galleryBtn">
+            <span class="choice-icon">🖼️</span>
+            <span class="choice-label">Escolher Arquivo</span>
+            <span class="choice-sub">Galeria ou Pasta</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="preview-container" id="previewContainer">
+        <img id="previewImage" src="" alt="Foto da tarefa">
+        <button class="remove-btn" id="removeBtn" title="Remover foto">✕</button>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" disabled>
+        <span id="btnIcon">🔍</span>
+        <span id="btnText">Envie uma foto primeiro</span>
+      </button>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+      <div class="results-header">
+        <div class="results-title">✨ Ótimo! Aqui está sua aula!</div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="explanation">📖 Explicação</button>
+        <button class="tab-btn" data-tab="exercises">✏️ Exercícios</button>
+        <button class="tab-btn" data-tab="quiz">🎮 Quiz</button>
+        <button class="tab-btn" data-tab="tips">💡 Dicas</button>
+      </div>
+
+      <div class="tab-content active" id="tab-explanation">
+        <div class="content-card sky">
+          <div class="content-card-accent"></div>
+          <div class="content-card-title">🌟 O que você vai aprender</div>
+          <div class="content-body" id="explanationContent">Carregando...</div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-exercises">
+        <div class="content-card coral">
+          <div class="content-card-accent"></div>
+          <div class="content-card-title">✏️ Praticando o que aprendeu</div>
+          <div id="exercisesContent"></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-quiz">
+        <div class="content-card purple">
+          <div class="content-card-accent"></div>
+          <div class="content-card-title">🎮 Quiz Divertido</div>
+          <div id="quizScore" style="display:none" class="score-badge">🏆 Pontuação: <span id="scoreText">0/0</span></div>
+          <div id="quizContent"></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-tips">
+        <div class="content-card sun">
+          <div class="content-card-accent"></div>
+          <div class="content-card-title">💡 Dicas para os Pais</div>
+          <div id="tipsContent"></div>
+        </div>
+      </div>
+
+      <div class="stars-reward" id="starsReward" style="display:none">
+        <div class="reward-stars" id="rewardStars">⭐⭐⭐</div>
+        <div class="reward-text" id="rewardText">Você é incrível! Continue assim!</div>
+      </div>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+        <button class="analyze-btn" id="savePdfBtn" style="background:linear-gradient(135deg,#F093FB,#F5576C);box-shadow:0 6px 24px rgba(240,147,251,0.4);flex:1;min-width:200px;">
+          📄 Salvar como PDF
+        </button>
+        <button class="analyze-btn" id="newTaskBtn" style="background:linear-gradient(135deg,var(--sky),#38B2AC);box-shadow:0 6px 24px rgba(78,205,196,0.4);flex:1;min-width:200px;">
+          📷 Analisar nova tarefa
+        </button>
+      </div>
+    </div>
+  </div><!-- /modoAluno -->
 
 
-<!-- API Key Modal -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--  MODO PROFESSOR                                            -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="modoProfessor" style="display:none">
+
+    <!-- Hero Professor -->
+    <div class="hero prof-hero">
+      <div class="lunna-hero">
+        <img src="lunna.png" alt="Lunna" class="lunna-hero-img">
+        <div class="lunna-speech">Olá, professor(a)! 👩‍🏫<br>Vou adaptar a atividade para você!</div>
+      </div>
+      <h1 class="hero-title">
+        Adaptação Pedagógica<br><span class="highlight">com Inteligência Artificial</span>
+      </h1>
+      <p class="hero-desc">Fotografe a atividade e escolha como adaptar o material para seus alunos.</p>
+      <div class="ia-badge">💡 Sugestão gerada por IA — o professor sempre revisa antes de usar</div>
+    </div>
+
+    <!-- TELA 1: Upload -->
+    <div class="prof-card" id="profTela1">
+      <div class="prof-card-header">
+        <span class="prof-step-badge">Passo 1 de 4</span>
+        <div class="prof-card-title">📷 Enviar a atividade</div>
+      </div>
+
+      <div class="grade-label">🎓 Série do aluno (opcional)</div>
+      <div class="grade-row">
+        <button class="grade-btn active" data-grade-prof="1º ano">1º ano</button>
+        <button class="grade-btn" data-grade-prof="2º ano">2º ano</button>
+        <button class="grade-btn" data-grade-prof="3º ano">3º ano</button>
+        <button class="grade-btn" data-grade-prof="4º ano">4º ano</button>
+        <button class="grade-btn" data-grade-prof="5º ano">5º ano</button>
+        <button class="grade-btn" data-grade-prof="6º ao 9º ano">6-9º</button>
+      </div>
+      <br>
+
+      <input type="file" id="profInputCamera" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="profInputGallery" accept="image/*" style="display:none">
+
+      <div class="upload-zone" id="profUploadZone">
+        <span class="upload-icon">📋</span>
+        <div class="upload-text">Como deseja enviar a atividade?</div>
+        <div class="upload-subtext" style="margin-bottom:20px">Texto do livro, folha de prova, exercício do caderno...</div>
+        <div class="upload-btn-row">
+          <button class="upload-choice-btn camera-btn" id="profCameraBtn">
+            <span class="choice-icon">📷</span>
+            <span class="choice-label">Tirar Foto</span>
+            <span class="choice-sub">Câmera</span>
+          </button>
+          <button class="upload-choice-btn gallery-btn" id="profGalleryBtn">
+            <span class="choice-icon">🖼️</span>
+            <span class="choice-label">Escolher Arquivo</span>
+            <span class="choice-sub">Galeria ou Pasta</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="preview-container" id="profPreviewContainer">
+        <img id="profPreviewImage" src="" alt="Foto da atividade">
+        <button class="remove-btn" id="profRemoveBtn" title="Remover foto">✕</button>
+      </div>
+
+      <button class="analyze-btn prof-analyze-btn" id="profAnalyzeBtn" disabled>
+        <span>🔍</span>
+        <span id="profBtnText">Envie uma foto primeiro</span>
+      </button>
+    </div>
+
+    <!-- TELA 2: Análise da IA -->
+    <div class="prof-card" id="profTela2" style="display:none">
+      <div class="prof-card-header">
+        <span class="prof-step-badge">Passo 2 de 4</span>
+        <div class="prof-card-title">🔍 O que a IA identificou</div>
+      </div>
+
+      <div class="analysis-grid">
+        <div class="analysis-item">
+          <div class="analysis-label">📚 Disciplina</div>
+          <div class="analysis-value" id="anaDisc">—</div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">📋 Tipo de atividade</div>
+          <div class="analysis-value" id="anaTipo">—</div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">🎒 Série estimada</div>
+          <div class="analysis-value" id="anaSerie">—</div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">📊 Nível</div>
+          <div class="analysis-value" id="anaNivel">—</div>
+        </div>
+      </div>
+
+      <div class="analysis-text-box">
+        <div class="analysis-text-label">📝 Texto extraído da imagem:</div>
+        <div class="analysis-text-content" id="anaTexto"></div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;">
+        <button class="prof-back-btn" id="profBackBtn1">← Voltar</button>
+        <button class="analyze-btn prof-analyze-btn" id="profNextBtn2" style="flex:1">
+          ✅ Ótimo! Escolher adaptação →
+        </button>
+      </div>
+    </div>
+
+    <!-- TELA 3: Botões de adaptação -->
+    <div class="prof-card" id="profTela3" style="display:none">
+      <div class="prof-card-header">
+        <span class="prof-step-badge">Passo 3 de 4</span>
+        <div class="prof-card-title">🛠️ Como deseja adaptar?</div>
+      </div>
+      <p class="prof-subtitle">Escolha uma opção abaixo. A IA vai gerar a versão adaptada da atividade.</p>
+
+      <div class="adapt-btn-grid">
+        <button class="adapt-btn" data-adapt="resumo">
+          <span class="adapt-icon">📄</span>
+          <span class="adapt-label">Resumo</span>
+          <span class="adapt-desc">Resumo simples com palavras-chave</span>
+        </button>
+        <button class="adapt-btn" data-adapt="simplificar">
+          <span class="adapt-icon">🔤</span>
+          <span class="adapt-label">Simplificar</span>
+          <span class="adapt-desc">Linguagem mais acessível</span>
+        </button>
+        <button class="adapt-btn" data-adapt="quiz">
+          <span class="adapt-icon">🎮</span>
+          <span class="adapt-label">Quiz</span>
+          <span class="adapt-desc">Perguntas de múltipla escolha</span>
+        </button>
+        <button class="adapt-btn" data-adapt="pistas_visuais">
+          <span class="adapt-icon">👁️</span>
+          <span class="adapt-label">Pistas Visuais</span>
+          <span class="adapt-desc">Com emojis e apoio visual</span>
+        </button>
+        <button class="adapt-btn" data-adapt="passo_a_passo">
+          <span class="adapt-icon">🪜</span>
+          <span class="adapt-label">Passo a Passo</span>
+          <span class="adapt-desc">Divide em etapas simples</span>
+        </button>
+        <button class="adapt-btn" data-adapt="multipla_escolha">
+          <span class="adapt-icon">📝</span>
+          <span class="adapt-label">Múltipla Escolha</span>
+          <span class="adapt-desc">Transforma em alternativas</span>
+        </button>
+        <button class="adapt-btn" data-adapt="ludico">
+          <span class="adapt-icon">🎪</span>
+          <span class="adapt-label">Versão Lúdica</span>
+          <span class="adapt-desc">Gamificada e divertida</span>
+        </button>
+      </div>
+
+      <button class="prof-back-btn" id="profBackBtn2" style="margin-top:16px">← Voltar</button>
+    </div>
+
+    <!-- TELA 4: Resultado -->
+    <div class="prof-card" id="profTela4" style="display:none">
+      <div class="prof-card-header">
+        <span class="prof-step-badge">Passo 4 de 4</span>
+        <div class="prof-card-title">✨ Atividade Adaptada</div>
+      </div>
+      <div class="ia-badge" style="margin-bottom:16px">💡 Sugestão gerada por IA — revise antes de usar com os alunos</div>
+
+      <div class="result-split">
+        <div class="result-col">
+          <div class="result-col-title">📋 Atividade Original</div>
+          <div class="result-col-body" id="resultOriginal"></div>
+        </div>
+        <div class="result-col result-col-adapted">
+          <div class="result-col-title">✨ Versão Adaptada</div>
+          <div class="result-col-body" id="resultAdaptado"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;justify-content:center;">
+        <button class="prof-action-btn copy-btn" id="profCopyBtn">📋 Copiar adaptação</button>
+        <button class="prof-action-btn pdf-btn" id="profPdfBtn">📄 Gerar PDF</button>
+        <button class="prof-action-btn new-btn" id="profNewAdaptBtn">🔄 Nova adaptação</button>
+        <button class="prof-action-btn new-btn" id="profNewActivityBtn">📷 Nova atividade</button>
+      </div>
+    </div>
+
+  </div><!-- /modoProfessor -->
+
+</div><!-- /container -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="app.js"></script>
 </body>

@@ -518,4 +518,332 @@ function savePDF() {
     alert('Erro ao gerar PDF. Tente novamente.');
   });
 }
+
+// ════════════════════════════════════════════════════════════════
+//  MODO PROFESSOR — Lógica completa
+// ════════════════════════════════════════════════════════════════
+
+// Estado do Modo Professor
+let profGrade = '1º ano';
+let profImageBase64 = null;
+let profImageType = null;
+let profAnalysisData = null;   // resultado do step=analyze
+let profAdaptResult = null;    // resultado do step=adapt
+
+// ── Alternância Aluno / Professor ───────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    document.getElementById('modoAluno').style.display     = mode === 'aluno'     ? '' : 'none';
+    document.getElementById('modoProfessor').style.display = mode === 'professor' ? '' : 'none';
+  });
 });
+
+// ── Grade buttons do Modo Professor ─────────────────────────────
+document.querySelectorAll('[data-grade-prof]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-grade-prof]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    profGrade = btn.dataset.gradeProf;
+  });
+});
+
+// ── File inputs do Modo Professor ───────────────────────────────
+const profInputCamera  = document.getElementById('profInputCamera');
+const profInputGallery = document.getElementById('profInputGallery');
+
+document.getElementById('profCameraBtn').addEventListener('click', () => {
+  profInputCamera.value = '';
+  profInputCamera.click();
+});
+document.getElementById('profGalleryBtn').addEventListener('click', () => {
+  profInputGallery.value = '';
+  profInputGallery.click();
+});
+
+profInputCamera.addEventListener('change', e => { if (e.target.files[0]) handleProfFile(e.target.files[0]); });
+profInputGallery.addEventListener('change', e => { if (e.target.files[0]) handleProfFile(e.target.files[0]); });
+
+function handleProfFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const result = e.target.result;
+    profImageBase64 = result.split(',')[1];
+    profImageType   = file.type;
+    document.getElementById('profPreviewImage').src = result;
+    document.getElementById('profPreviewContainer').style.display = 'block';
+    document.getElementById('profUploadZone').style.display = 'none';
+    document.getElementById('profBtnText').textContent = 'Analisar atividade com IA 🔍';
+    document.getElementById('profAnalyzeBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('profRemoveBtn').addEventListener('click', () => {
+  profImageBase64 = null;
+  profImageType   = null;
+  document.getElementById('profPreviewContainer').style.display = 'none';
+  document.getElementById('profUploadZone').style.display = 'block';
+  document.getElementById('profBtnText').textContent = 'Envie uma foto primeiro';
+  document.getElementById('profAnalyzeBtn').disabled = true;
+  profInputCamera.value = '';
+  profInputGallery.value = '';
+});
+
+// ── ETAPA A: Analisar imagem ─────────────────────────────────────
+document.getElementById('profAnalyzeBtn').addEventListener('click', async () => {
+  if (!profImageBase64) return;
+  showLoading('Lendo a atividade... 🔍', 'Identificando disciplina... 📚', 'Extraindo texto... ✍️', 'Quase pronto... ⚡');
+
+  try {
+    const res = await fetch('/api/adapt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        step: 'analyze',
+        imageBase64: profImageBase64,
+        imageType: profImageType,
+        grade: profGrade
+      })
+    });
+    hideLoading();
+
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Erro ${res.status}`); }
+
+    const data = await res.json();
+    if (data.erro) throw new Error(data.erro);
+
+    profAnalysisData = data;
+    renderAnalysis(data);
+    showProfTela(2);
+
+  } catch (err) {
+    hideLoading();
+    alert('Erro ao analisar: ' + err.message);
+  }
+});
+
+function renderAnalysis(data) {
+  document.getElementById('anaDisc').textContent   = data.disciplina       || '—';
+  document.getElementById('anaTipo').textContent   = data.tipoAtividade    || '—';
+  document.getElementById('anaSerie').textContent  = data.serieEstimada    || '—';
+  document.getElementById('anaNivel').textContent  = data.nivelDificuldade || '—';
+  document.getElementById('anaTexto').textContent  = data.textoReconhecido || '(não foi possível extrair o texto)';
+}
+
+// ── Navegação entre telas ────────────────────────────────────────
+function showProfTela(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById(`profTela${i}`).style.display = i === n ? '' : 'none';
+  });
+  document.getElementById('modoProfessor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('profBackBtn1').addEventListener('click', () => showProfTela(1));
+document.getElementById('profBackBtn2').addEventListener('click', () => showProfTela(2));
+document.getElementById('profNextBtn2').addEventListener('click', () => showProfTela(3));
+
+// ── Botões de adaptação ──────────────────────────────────────────
+document.querySelectorAll('.adapt-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.adapt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const adaptType = btn.dataset.adapt;
+    showLoading('Gerando adaptação... ✨', 'Processando conteúdo... 🧠', 'Criando versão adaptada... 📝', 'Quase lá... 🚀');
+
+    try {
+      const res = await fetch('/api/adapt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step: 'adapt',
+          analyzedText:  profAnalysisData.textoReconhecido,
+          subject:       profAnalysisData.disciplina,
+          activityType:  profAnalysisData.tipoAtividade,
+          grade:         profGrade,
+          adaptationType: adaptType
+        })
+      });
+      hideLoading();
+
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Erro ${res.status}`); }
+
+      const data = await res.json();
+      profAdaptResult = data;
+      renderAdaptationResult(data, adaptType);
+      showProfTela(4);
+
+    } catch (err) {
+      hideLoading();
+      btn.classList.remove('selected');
+      alert('Erro ao gerar adaptação: ' + err.message);
+    }
+  });
+});
+
+// ── Renderizar resultado (Tela 4) ────────────────────────────────
+function renderAdaptationResult(data, type) {
+  // Coluna original
+  document.getElementById('resultOriginal').innerHTML =
+    `<p>${(profAnalysisData.textoReconhecido || '').replace(/\n/g, '<br>')}</p>`;
+
+  // Coluna adaptada — renderiza conforme o tipo
+  const r = data.result;
+  let html = '';
+
+  if (type === 'resumo') {
+    html = `
+      <h4>💡 Ideia Principal</h4><p>${r.ideaPrincipal || ''}</p>
+      <h4>📄 Resumo Simples</h4><p>${r.resumoSimples || ''}</p>
+      <h4>🔑 Palavras-chave</h4>
+      <div>${(r.palavrasChave || []).map(k => `<span class="keyword-tag">${k}</span>`).join('')}</div>
+      <h4>📝 Versão Curta</h4><p>${r.versaoCurta || ''}</p>`;
+
+  } else if (type === 'simplificar') {
+    html = `
+      <h4>📖 Texto Simplificado</h4><p>${(r.textoSimplificado || '').replace(/\n/g, '<br>')}</p>
+      ${(r.palavrasDificeis || []).length ? `<h4>🔄 Substituições</h4>
+        ${r.palavrasDificeis.map(w => `<div class="q-item"><strong>${w.original}</strong> → ${w.simples}</div>`).join('')}` : ''}
+      ${(r.dicas || []).length ? `<h4>💡 Dicas para o Professor</h4>
+        ${r.dicas.map(d => `<div class="q-item">• ${d}</div>`).join('')}` : ''}`;
+
+  } else if (type === 'quiz') {
+    const letras = ['A','B','C','D'];
+    html = (r.quiz || []).map((q, i) => `
+      <div class="quiz-item">
+        <strong>${i+1}. ${q.pergunta}</strong><br>
+        ${(q.opcoes || []).map((o, j) => `<div style="margin-top:4px;${j===q.correta?'color:#059669;font-weight:800;':''}">${letras[j]}) ${o.replace(/^[A-D]\)\s*/,'')}</div>`).join('')}
+        <div style="margin-top:6px;font-size:12px;color:#667788;">💡 ${q.explicacao || ''}</div>
+      </div>`).join('');
+
+  } else if (type === 'pistas_visuais') {
+    html = (r.questoesAdaptadas || []).map(q => `
+      <div class="q-item">
+        <div style="color:#8899AA;font-size:12px;margin-bottom:4px;">Original: ${q.original}</div>
+        <div style="font-weight:700;margin-bottom:6px;">✨ ${q.adaptada}</div>
+        ${(q.apoioVisual || []).map(a => `<span class="keyword-tag">${a}</span>`).join('')}
+      </div>`).join('') +
+      (r.instrucaoParaProfessor ? `<div class="q-item" style="margin-top:12px;"><strong>📋 Para o professor:</strong><br>${r.instrucaoParaProfessor}</div>` : '');
+
+  } else if (type === 'passo_a_passo') {
+    html = `
+      ${(r.passos || []).map(p => `<div class="step-item"><strong>Passo ${p.numero}:</strong> ${p.instrucao}${p.dica?`<br><span style="color:#667788;font-size:12px;">💡 ${p.dica}</span>`:''}</div>`).join('')}
+      ${r.tempoEstimado ? `<div class="q-item">⏱️ Tempo estimado: ${r.tempoEstimado}</div>` : ''}
+      ${(r.materialNecessario||[]).length ? `<div class="q-item">📦 Material: ${r.materialNecessario.join(', ')}</div>` : ''}`;
+
+  } else if (type === 'multipla_escolha') {
+    const letras = ['A','B','C','D'];
+    html = (r.questoes || []).map((q, i) => `
+      <div class="quiz-item">
+        <strong>${i+1}. ${q.perguntaAdaptada}</strong><br>
+        ${(q.opcoes||[]).map((o,j) => `<div style="margin-top:4px;${j===q.correta?'color:#059669;font-weight:800;':''}">${letras[j]}) ${o.replace(/^[A-D]\)\s*/,'')}</div>`).join('')}
+      </div>`).join('');
+
+  } else if (type === 'ludico') {
+    html = `
+      <h4>🎪 ${r.tituloJogo || 'Atividade Lúdica'}</h4>
+      <p>${r.descricao || ''}</p>
+      ${(r.regras||[]).length ? `<h4>📋 Regras</h4>${r.regras.map(rg=>`<div class="step-item">• ${rg}</div>`).join('')}` : ''}
+      ${(r.desafios||[]).length ? `<h4>🎯 Desafios</h4>${r.desafios.map(d=>`<div class="step-item">🌟 ${d}</div>`).join('')}` : ''}
+      ${r.recompensa ? `<div class="q-item" style="margin-top:12px;">🏆 Recompensa: ${r.recompensa}</div>` : ''}`;
+  }
+
+  document.getElementById('resultAdaptado').innerHTML = html || '<p>Resultado gerado com sucesso!</p>';
+}
+
+// ── Botões da Tela 4 ─────────────────────────────────────────────
+document.getElementById('profCopyBtn').addEventListener('click', () => {
+  const text = document.getElementById('resultAdaptado').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('profCopyBtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copiado!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  }).catch(() => alert('Não foi possível copiar. Selecione o texto manualmente.'));
+});
+
+document.getElementById('profNewAdaptBtn').addEventListener('click', () => {
+  document.querySelectorAll('.adapt-btn').forEach(b => b.classList.remove('selected'));
+  showProfTela(3);
+});
+
+document.getElementById('profNewActivityBtn').addEventListener('click', () => {
+  profImageBase64 = null; profImageType = null; profAnalysisData = null; profAdaptResult = null;
+  document.getElementById('profPreviewContainer').style.display = 'none';
+  document.getElementById('profUploadZone').style.display = 'block';
+  document.getElementById('profBtnText').textContent = 'Envie uma foto primeiro';
+  document.getElementById('profAnalyzeBtn').disabled = true;
+  document.querySelectorAll('.adapt-btn').forEach(b => b.classList.remove('selected'));
+  showProfTela(1);
+});
+
+document.getElementById('profPdfBtn').addEventListener('click', () => {
+  const btn = document.getElementById('profPdfBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ Gerando...';
+  btn.disabled = true;
+
+  const orig_text = document.getElementById('resultOriginal').innerHTML;
+  const adapt_text = document.getElementById('resultAdaptado').innerHTML;
+
+  const pdfContent = `
+    <div style="font-family:Arial,sans-serif;color:#1a202c;padding:16px;">
+      <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #667EEA;">
+        <div style="font-size:24px;font-weight:900;color:#667EEA;">LM EduKids — Modo Professor ✨</div>
+        <div style="font-size:12px;color:#718096;margin-top:4px;">Adaptação Pedagógica com IA · Sugestão gerada por IA — professor revisa antes de usar</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <div style="background:#667EEA;color:white;padding:8px 14px;border-radius:8px;font-weight:800;margin-bottom:12px;">📋 Atividade Original</div>
+          <div style="font-size:13px;line-height:1.7;">${orig_text}</div>
+        </div>
+        <div>
+          <div style="background:#764BA2;color:white;padding:8px 14px;border-radius:8px;font-weight:800;margin-bottom:12px;">✨ Versão Adaptada</div>
+          <div style="font-size:13px;line-height:1.7;">${adapt_text}</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:24px;font-size:11px;color:#A0AEC0;border-top:1px solid #E2E8F0;padding-top:12px;">
+        LM EduKids Modo Professor • Adaptação gerada por IA • Revise antes de usar com alunos
+      </div>
+    </div>`;
+
+  const el = document.createElement('div');
+  el.innerHTML = pdfContent;
+  document.body.appendChild(el);
+
+  html2pdf().set({
+    margin: [10,10,10,10],
+    filename: 'LMEduKids-Adaptacao.pdf',
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(el).save().then(() => {
+    document.body.removeChild(el);
+    btn.innerHTML = orig; btn.disabled = false;
+  }).catch(() => {
+    document.body.removeChild(el);
+    btn.innerHTML = orig; btn.disabled = false;
+    alert('Erro ao gerar PDF.');
+  });
+});
+
+// ── Helpers de loading ───────────────────────────────────────────
+function showLoading(...msgs) {
+  const overlay = document.getElementById('loadingOverlay');
+  const text    = document.getElementById('loadingText');
+  overlay.classList.add('active');
+  let i = 0;
+  text.textContent = msgs[0];
+  overlay._interval = setInterval(() => { i = (i+1) % msgs.length; text.textContent = msgs[i]; }, 1500);
+}
+function hideLoading() {
+  const overlay = document.getElementById('loadingOverlay');
+  clearInterval(overlay._interval);
+  overlay.classList.remove('active');
+}
+
+}); // fim DOMContentLoaded
+

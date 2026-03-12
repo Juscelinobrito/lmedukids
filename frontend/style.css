@@ -969,3 +969,355 @@
   }
 
   .lunna-speech strong { color: #7C3AED; }
+
+  /* ══════════════════════════════════════════════════════════════
+     MODO SWITCHER
+  ══════════════════════════════════════════════════════════════ */
+  .mode-switcher-wrap {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px 20px;
+  }
+
+  .mode-switcher {
+    display: flex;
+    background: white;
+    border-radius: 50px;
+    padding: 5px;
+    box-shadow: 0 4px 20px rgba(44,62,80,0.12);
+    gap: 4px;
+  }
+
+  .mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 50px;
+    border: none;
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #8899AA;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .mode-btn.active {
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: white;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.4);
+  }
+
+  .mode-btn:not(.active):hover { color: var(--deep); background: #F0F4FF; }
+
+  /* ══════════════════════════════════════════════════════════════
+     MODO PROFESSOR — ESTRUTURA GERAL
+  ══════════════════════════════════════════════════════════════ */
+  .prof-hero { padding-bottom: 16px; }
+
+  .ia-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
+    border: 1.5px solid rgba(102,126,234,0.3);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4C51BF;
+    margin-top: 8px;
+  }
+
+  .prof-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    border-top: 4px solid transparent;
+    border-image: linear-gradient(90deg, #667EEA, #764BA2) 1;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .prof-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .prof-step-badge {
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 50px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .prof-card-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--deep);
+  }
+
+  .prof-subtitle {
+    color: #667788;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .prof-analyze-btn {
+    background: linear-gradient(135deg, #667EEA, #764BA2) !important;
+    box-shadow: 0 6px 24px rgba(102,126,234,0.4) !important;
+  }
+
+  .prof-back-btn {
+    padding: 12px 22px;
+    border: 2.5px solid #E0E8F0;
+    border-radius: 14px;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #667788;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .prof-back-btn:hover { border-color: #667EEA; color: #667EEA; }
+
+  /* ── Tela 2: Análise ─────────────────────────────────────────── */
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 500px) { .analysis-grid { grid-template-columns: 1fr; } }
+
+  .analysis-item {
+    background: #F8FBFF;
+    border-radius: 16px;
+    padding: 14px 18px;
+    border: 2px solid #E8F0FF;
+  }
+
+  .analysis-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #8899AA;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .analysis-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--deep);
+  }
+
+  .analysis-text-box {
+    background: #F8FBFF;
+    border-radius: 16px;
+    padding: 18px;
+    border: 2px solid #E8F0FF;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .analysis-text-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #667788;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .analysis-text-content {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #445566;
+    font-weight: 600;
+    white-space: pre-wrap;
+  }
+
+  /* ── Tela 3: Botões de adaptação ─────────────────────────────── */
+  .adapt-btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .adapt-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 20px 14px;
+    background: white;
+    border: 2.5px solid #E8F0FF;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.25s ease;
+    text-align: center;
+  }
+
+  .adapt-btn:hover {
+    border-color: #667EEA;
+    background: linear-gradient(135deg, #F0F3FF, #EDE9FE);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(102,126,234,0.2);
+  }
+
+  .adapt-btn.selected {
+    border-color: #667EEA;
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102,126,234,0.4);
+  }
+
+  .adapt-icon { font-size: 32px; line-height: 1; }
+
+  .adapt-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--deep);
+  }
+  .adapt-btn.selected .adapt-label { color: white; }
+
+  .adapt-desc {
+    font-size: 11px;
+    font-weight: 600;
+    color: #8899AA;
+    line-height: 1.3;
+  }
+  .adapt-btn.selected .adapt-desc { color: rgba(255,255,255,0.85); }
+
+  /* ── Tela 4: Resultado dividido ──────────────────────────────── */
+  .result-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 640px) { .result-split { grid-template-columns: 1fr; } }
+
+  .result-col {
+    background: #F8FBFF;
+    border-radius: 20px;
+    padding: 20px;
+    border: 2px solid #E8F0FF;
+  }
+
+  .result-col-adapted {
+    background: linear-gradient(135deg, #F0F3FF, #EDE9FE);
+    border-color: rgba(102,126,234,0.3);
+  }
+
+  .result-col-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--deep);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(102,126,234,0.15);
+  }
+
+  .result-col-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #445566;
+    font-weight: 600;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .result-col-body h4 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 15px;
+    color: #667EEA;
+    margin: 14px 0 6px;
+  }
+
+  .result-col-body .quiz-item,
+  .result-col-body .step-item,
+  .result-col-body .q-item {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1.5px solid rgba(102,126,234,0.2);
+  }
+
+  .keyword-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 50px;
+    margin: 3px;
+  }
+
+  .correct-answer {
+    color: #059669;
+    font-weight: 800;
+  }
+
+  /* ── Botões de ação resultado ───────────────────────────────── */
+  .prof-action-btn {
+    padding: 14px 22px;
+    border-radius: 16px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .copy-btn {
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: white;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.4);
+  }
+
+  .pdf-btn {
+    background: linear-gradient(135deg, #F093FB, #F5576C);
+    color: white;
+    box-shadow: 0 4px 14px rgba(240,147,251,0.4);
+  }
+
+  .new-btn {
+    background: white;
+    color: #667EEA;
+    border: 2.5px solid #E8F0FF;
+  }
+
+  .prof-action-btn:hover { transform: translateY(-2px); }
+  .copy-btn:hover { box-shadow: 0 8px 20px rgba(102,126,234,0.5); }
+  .pdf-btn:hover  { box-shadow: 0 8px 20px rgba(240,147,251,0.5); }
+  .new-btn:hover  { border-color: #667EEA; }
