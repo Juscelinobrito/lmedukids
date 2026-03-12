@@ -1,0 +1,8 @@
+{
+  "name": "lmedukids",
+  "version": "1.0.0",
+  "description": "LM EduKids — App educacional com IA para crianças",
+  "dependencies": {
+    "openai": "^6.27.0"
+  }
+}
