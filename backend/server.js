@@ -11,6 +11,16 @@ const app = express();
 const PORT = process.env.PORT || 3456;
 const API_KEY = process.env.OPENAI_API_KEY || '';
 
+// ─── Feature Flags (Controle de Funcionalidades) ─────────────────────────────
+const FEATURES = {
+  PRACTICE_MODE: process.env.ENABLE_PRACTICE_MODE === 'true',
+  GRADING: process.env.ENABLE_GRADING === 'true',
+  CACHE: process.env.ENABLE_CACHE !== 'false', // Ativado por padrão
+  RATE_LIMIT: process.env.ENABLE_RATE_LIMIT !== 'false' // Ativado por padrão
+};
+
+console.log('🎯 Feature Flags:', FEATURES);
+
 // ─── Cache Configuration ────────────────────────────────────────────────────
 const cache = new NodeCache({ stdTTL: 300 }); // 5 minutos TTL
 
@@ -23,10 +33,19 @@ const limiter = rateLimit({
   legacyHeaders: false
 });
 
+// Middleware condicional para rate limit
+const conditionalRateLimit = (req, res, next) => {
+  if (FEATURES.RATE_LIMIT) {
+    limiter(req, res, next);
+  } else {
+    next();
+  }
+};
+
 // ─── Middlewares ────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json({ limit: '20mb' })); // imagens base64 são grandes
-app.use('/api/', limiter); // Aplicar rate limit apenas nas APIs
+app.use('/api/', conditionalRateLimit); // Aplicar rate limit apenas nas APIs (se feature flag ativa)
 
 // ─── Servir o frontend em produção ──────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
@@ -89,6 +108,15 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     hasApiKey: !!API_KEY,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ─── Mostrar features ativas no ambiente ─────────────────────────────────────
+app.get('/api/features', (req, res) => {
+  res.json({
+    environment: process.env.ENVIRONMENT || 'development',
+    features: FEATURES,
     timestamp: new Date().toISOString()
   });
 });
@@ -171,6 +199,11 @@ app.post('/api/messages', async (req, res) => {
 
 // ─── NOVO: Corrigir resposta do aluno ────────────────────────────────────────
 app.post('/api/grade', async (req, res) => {
+  // Feature flag: desabilitar /api/grade em staging
+  if (!FEATURES.GRADING) {
+    return res.status(404).json({ error: 'Endpoint não disponível neste ambiente' });
+  }
+
   if (!API_KEY) {
     return res.status(401).json({ error: 'API key não configurada' });
   }

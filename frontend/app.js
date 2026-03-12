@@ -9,10 +9,48 @@ let quizAnswers = {};
 let quizCorrect = 0;
 let quizTotal = 0;
 
+// ─── Feature Flags (Carregadas do Backend) ──────────────────────────────────
+let FEATURES = {
+  PRACTICE_MODE: false,
+  GRADING: false,
+  CACHE: true,
+  RATE_LIMIT: true
+};
+
+// Carregar features do servidor
+async function loadFeatures() {
+  try {
+    const response = await fetch('/api/features');
+    if (response.ok) {
+      const data = await response.json();
+      FEATURES = data.features || FEATURES;
+      console.log('✅ Features carregadas:', FEATURES);
+    }
+  } catch (error) {
+    console.warn('⚠️ Não foi possível carregar features (usando padrão):', error);
+  }
+}
+
+// Ocultar elementos baseado em feature flags
+function applyFeatureFlags() {
+  // Ocultar tab de prática se desabilitado
+  if (!FEATURES.PRACTICE_MODE) {
+    const practiceTab = document.querySelector('[data-tab="practice"]');
+    const practiceContent = document.getElementById('tab-practice');
+    if (practiceTab) practiceTab.style.display = 'none';
+    if (practiceContent) practiceContent.style.display = 'none';
+  }
+}
+
 // ─── Modo Prática ───────────────────────────────────────────────────────────
 let currentExercises = [];
 let currentQuiz = [];
 let practiceMode = null; // 'exercises' ou 'quiz'
+
+// ━━━ Inicializar Features ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+loadFeatures().then(() => {
+  applyFeatureFlags();
+});
 
 // Grade buttons
 document.querySelectorAll('.grade-btn').forEach(btn => {
