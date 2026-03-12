@@ -922,6 +922,7 @@
     object-fit: contain;
     animation: lunna-bounce 0.9s ease-in-out infinite;
     filter: drop-shadow(0 8px 20px rgba(167,139,250,0.35));
+    mix-blend-mode: multiply;
   }
 
   @keyframes lunna-bounce {
@@ -945,6 +946,7 @@
     object-fit: contain;
     animation: lunna-wave 3s ease-in-out infinite;
     filter: drop-shadow(0 6px 16px rgba(167,139,250,0.3));
+    mix-blend-mode: multiply;
   }
 
   @keyframes lunna-wave {
