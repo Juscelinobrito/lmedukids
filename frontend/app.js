@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-const API_KEY_MISSING_MSG = "Para usar o EduKids, configure sua chave da API Gemini.";
+const API_KEY_MISSING_MSG = "Para usar o LM EduKids, configure sua chave da API Gemini.";
 
 let currentGrade = "1";
 let uploadedImageBase64 = null;
@@ -452,7 +452,7 @@ function savePDF() {
 
       <!-- Cabeçalho -->
       <div style="text-align:center; margin-bottom:28px; padding-bottom:16px; border-bottom:3px solid #667EEA;">
-        <div style="font-size:28px; font-weight:900; color:#667EEA; margin-bottom:4px;">EduKids ✨</div>
+        <div style="font-size:28px; font-weight:900; color:#667EEA; margin-bottom:4px;">LM EduKids ✨</div>
         <div style="font-size:13px; color:#718096;">Aprender é Divertido com IA</div>
       </div>
 
@@ -490,7 +490,7 @@ function savePDF() {
 
       <!-- Rodapé -->
       <div style="text-align:center; margin-top:24px; padding-top:12px; border-top:2px solid #E2E8F0; font-size:11px; color:#A0AEC0;">
-        Gerado pelo EduKids • aprender é divertido! 🚀
+        Gerado pelo LM EduKids • aprender é divertido! 🚀
       </div>
     </div>
   `;
@@ -501,7 +501,7 @@ function savePDF() {
 
   const opcoes = {
     margin:       [10, 10, 10, 10],
-    filename:     'EduKids-Aula.pdf',
+    filename:     'LMEduKids-Aula.pdf',
     image:        { type: 'jpeg', quality: 0.95 },
     html2canvas:  { scale: 2, useCORS: true },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }

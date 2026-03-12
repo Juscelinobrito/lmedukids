@@ -1,11 +1,11 @@
-# 📚 EduKids — Estudo Inteligente com IA
+# 📚 LM EduKids — Estudo Inteligente com IA
 
 App para ensino infantil e fundamental I. Os pais enviam foto de uma tarefa escolar e a IA gera explicações, exercícios e quiz personalizados.
 
 ## 📁 Estrutura do projeto
 
 ```
-edukids/
+lmedukids/
 ├── frontend/
 │   ├── index.html   # Interface do app
 │   ├── style.css    # Estilos
