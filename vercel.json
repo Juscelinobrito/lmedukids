@@ -2,11 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/messages.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "api/adapt.js",
+      "src": "backend/server.js",
       "use": "@vercel/node"
     },
     {
@@ -16,25 +12,24 @@
   ],
   "routes": [
     {
-      "src": "/api/messages",
-      "dest": "/api/messages.js"
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
     },
-    {
-      "src": "/api/adapt",
-      "dest": "/api/adapt.js"
-    },
-
     {
       "src": "/health",
-      "dest": "/api/messages.js"
+      "dest": "backend/server.js"
     },
     {
       "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot))",
-      "dest": "/frontend/$1"
+      "dest": "frontend/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/index.html"
+      "dest": "frontend/index.html"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "buildCommand": "cd backend && npm install"
 }
