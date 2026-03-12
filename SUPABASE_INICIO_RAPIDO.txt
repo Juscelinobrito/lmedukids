@@ -1,0 +1,283 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  🗄️  SUPABASE - COMECE AQUI 🗄️                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Project ID: ndmccxupbrplljalqegh
+Project URL: https://ndmccxupbrplljalqegh.supabase.co
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 5 PASSOS PARA CONFIGURAR SUPABASE
+═══════════════════════════════════════════════════════════════════════════════
+
+PASSO 1: Obter API Keys (5 min)
+────────────────────────────────
+1. Abra: https://app.supabase.com
+2. Selecione projeto "lmedukids"
+3. Vá para Settings → API
+4. Copie:
+   • anon (public) key
+   • service_role (secret) key
+5. Cole em: .env.supabase
+
+PASSO 2: Criar Tabelas (5 min)
+────────────────────────────────
+1. No Supabase Dashboard: SQL Editor
+2. Abra novo Query
+3. Cole arquivo: database/schema.sql
+4. Clique "Run"
+
+PASSO 3: Criar Storage Buckets (5 min)
+──────────────────────────────────────
+1. Supabase Dashboard → Storage
+2. Clique "New Bucket" 3x:
+   ✓ user-avatars (Public)
+   ✓ exercise-images (Private)
+   ✓ teacher-content (Private)
+
+PASSO 4: Ativar Autenticação (2 min)
+────────────────────────────────────
+1. Supabase Dashboard → Authentication → Providers
+2. Email/Password → Habilitar
+3. (Opicional) Ativar Google/GitHub
+
+PASSO 5: Instalar Cliente (3 min)
+──────────────────────────────────
+cd c:/lmedukids/frontend
+npm install @supabase/supabase-js
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📝 ARQUIVOS JÁ CRIADOS
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ database/schema.sql ............. SQL para criar todas as tabelas
+✅ frontend/supabase.js ............ Cliente Supabase + funções prontas
+✅ .env.supabase ................... Template de variáveis
+✅ SUPABASE_SETUP.md ............... Documentação completa
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🗂️ ESTRUTURA DO BANCO
+═══════════════════════════════════════════════════════════════════════════════
+
+users
+├─ id (UUID) - da autenticação do Supabase
+├─ email
+├─ name
+├─ role: 'student' | 'teacher'
+├─ grade: 1-9 (apenas alunos)
+└─ profile_picture_url
+
+exercises
+├─ id (UUID)
+├─ user_id → users.id
+├─ image_url
+├─ analysis (JSON)
+├─ subject, grade
+└─ attempts, correct_attempts, stars
+
+exercise_responses
+├─ id (UUID)
+├─ exercise_id → exercises.id
+├─ user_id → users.id
+├─ student_answer
+├─ is_correct (true/false)
+└─ feedback (JSON)
+
+quiz_results
+├─ id (UUID)
+├─ user_id → users.id
+├─ total_questions
+├─ correct_answers
+├─ score (0-100)
+└─ quiz_data (JSON)
+
+teacher_content
+├─ id (UUID)
+├─ teacher_id → users.id
+├─ title
+├─ content_data (JSON)
+├─ is_public (true/false)
+└─ students_assigned (array)
+
+classrooms
+├─ id (UUID)
+├─ teacher_id → users.id
+├─ name
+├─ grade
+├─ invite_code (para alunos entrar)
+└─ students_enrolled (array)
+
+student_progress
+├─ id (UUID)
+├─ student_id → users.id (UNIQUE)
+├─ total_exercises_completed
+├─ total_stars
+├─ current_streak
+└─ subjects_stats (JSON)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💻 USAR NO CÓDIGO
+═══════════════════════════════════════════════════════════════════════════════
+
+1. SIGNUP (Registrar novo usuário):
+   
+   import { signUpUser } from './supabase.js';
+   
+   const { user, profile, error } = await signUpUser(
+     'aluno@email.com',
+     'senha123',
+     'João Silva',
+     'student',  // ou 'teacher'
+     6           // série (1-9), apenas para alunos
+   );
+
+2. LOGIN (Entrar):
+   
+   import { loginUser } from './supabase.js';
+   
+   const { user, profile, error } = await loginUser(
+     'aluno@email.com',
+     'senha123'
+   );
+
+3. VERIFICAR USUÁRIO ATUAL:
+   
+   import { getCurrentUser } from './supabase.js';
+   
+   const { user, profile } = await getCurrentUser();
+   if (!user) {
+     // Não está logado - mostrar tela de login
+   }
+
+4. SALVAR EXERCÍCIO (após análise IA):
+   
+   import { saveExercise } from './supabase.js';
+   
+   const { data: exercise, error } = await saveExercise(
+     userId,
+     imageUrl,
+     imageHash,
+     analysisData,      // JSON da análise
+     '2+2 = ?',        // texto do exercício
+     'math',           // subject
+     3                 // grade
+   );
+
+5. SALVAR RESPOSTA DO ALUNO:
+   
+   import { saveExerciseResponse } from './supabase.js';
+   
+   const { data: response, error } = await saveExerciseResponse(
+     exerciseId,
+     userId,
+     '4',                    // resposta do aluno
+     true,                   // is_correct
+     { hint: '...', ... },   // feedback JSON
+     'Pense em 1+1+1+1',    // dica
+     1                       // estrelas ganhas
+   );
+
+6. LISTAR EXERCÍCIOS DO USUÁRIO:
+   
+   import { getUserExercises } from './supabase.js';
+   
+   const { data: exercises, error } = await getUserExercises(userId);
+   // Retorna array de exercícios
+
+7. UPLOAD IMAGEM:
+   
+   import { uploadExerciseImage } from './supabase.js';
+   
+   const file = document.getElementById('fileInput').files[0];
+   const { publicUrl, error } = await uploadExerciseImage(userId, file);
+   // Retorna URL pública da imagem
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔐 ROTEIRO DE IMPLEMENTAÇÃO (PHASE 2)
+═══════════════════════════════════════════════════════════════════════════════
+
+SEMANA 1:
+  ☐ Criar tela de Login/Signup
+  ☐ Integrar autenticação ao app
+  ☐ Testar signup e login
+  ☐ Armazenar token de sessão
+
+SEMANA 2:
+  ☐ Salvar exercícios análisados no banco
+  ☐ Salvar respostas dos alunos
+  ☐ Mostrar histórico de exercícios
+  ☐ Mostrar progresso (total de estrelas, etc)
+
+SEMANA 3:
+  ☐ Criar painel de professor
+  ☐ Permitir professor criar exercícios
+  ☐ Permitir professor ver progresso de alunos
+  ☐ Criar turmas com código de entrada
+
+SEMANA 4:
+  ☐ Deploy no Vercel com Supabase
+  ☐ Testes com dados reais
+  ☐ Ajustes finais
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ CHECKLIST ANTES DE COMEÇAR IMPLEMENTAÇÃO
+═══════════════════════════════════════════════════════════════════════════════
+
+[ ] Copiei as API keys para .env.supabase
+[ ] Executei o schema.sql no Supabase
+[ ] Criei 3 storage buckets
+[ ] Habilitei autenticação Email/Password
+[ ] testei conexão (fetch test funcionou)
+[ ] Instalei @supabase/supabase-js
+[ ] Importei supabase.js no app.js
+[ ] Lí SUPABASE_SETUP.md completamente
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🆘 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Erro: "Invalid API key"
+→ Verificar se copiu a chave corretamente (sem espaços)
+→ Verificar .env.supabase e VITE_SUPABASE_ANON_KEY
+
+Erro: "Table does not exist"
+→ Verificar se o schema.sql foi executado completamente
+→ Ir em Supabase Dashboard → Tables e confirmar que existem 7 tabelas
+
+Erro: "Unauthorized" ao tentar inserir dados
+→ Verificar Row Level Security (RLS) policies
+→ Verificar se usuário está logado
+
+Erro ao upload de imagem
+→ Verificar se storage buckets foram criados
+→ Verificar se arquivo tem menos de 50MB
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 REFERÊNCIAS
+═══════════════════════════════════════════════════════════════════════════════
+
+Documentação Supabase:    https://supabase.com/docs
+API Reference:           https://supabase.com/docs/reference/javascript
+Auth Setup:             https://supabase.com/docs/guides/auth
+Storage:                https://supabase.com/docs/guides/storage
+RLS Policies:           https://supabase.com/docs/guides/auth/row-level-security
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 PRÓXIMO PASSO
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Seguir 5 passos acima (15 minutos)
+2. Testar conexão no console
+3. Enviado tudo para GitHub
+4. Criar tela de Login/Signup no frontend
+5. Integrar ao app.js
+
+Quer começar? 🎉

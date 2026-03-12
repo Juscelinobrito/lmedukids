@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "LM EduKids — App educacional com IA para crianças",
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
     "openai": "^6.27.0"
   }
 }
