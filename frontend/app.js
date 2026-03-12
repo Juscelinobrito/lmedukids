@@ -20,7 +20,7 @@ let FEATURES = {
 // Carregar features do servidor
 async function loadFeatures() {
   try {
-    const response = await fetch('/api/features');
+    const response = await fetch('http://localhost:3456/api/features');
     if (response.ok) {
       const data = await response.json();
       FEATURES = data.features || FEATURES;
@@ -200,7 +200,7 @@ async function analyzeTask() {
 
   try {
     // Envia imagem + série para o backend Gemini
-    const response = await fetch('/api/messages', {
+    const response = await fetch('http://localhost:3456/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -672,7 +672,7 @@ document.getElementById('profAnalyzeBtn').addEventListener('click', async () => 
   showLoading('Lendo a atividade... 🔍', 'Identificando disciplina... 📚', 'Extraindo texto... ✍️', 'Quase pronto... ⚡');
 
   try {
-    const res = await fetch('/api/adapt', {
+    const res = await fetch('http://localhost:3456/api/adapt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -729,7 +729,7 @@ document.querySelectorAll('.adapt-btn').forEach(btn => {
     showLoading('Gerando adaptação... ✨', 'Processando conteúdo... 🧠', 'Criando versão adaptada... 📝', 'Quase lá... 🚀');
 
     try {
-      const res = await fetch('/api/adapt', {
+      const res = await fetch('http://localhost:3456/api/adapt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
