@@ -16,6 +16,31 @@
   <div class="shape"></div>
 </div>
 
+<!-- Authentication Modal (login/signup) -->
+<div id="authOverlay" class="auth-overlay" style="display:none;">
+  <div class="auth-box">
+    <h2 id="authTitle">Entrar</h2>
+    <div id="loginForm">
+      <input id="authEmail" type="email" placeholder="Email">
+      <input id="authPassword" type="password" placeholder="Senha">
+      <button id="btnAuthAction">Entrar</button>
+      <p>Não tem conta? <a href="#" id="linkShowSignup">Registrar</a></p>
+    </div>
+    <div id="signupForm" style="display:none;">
+      <input id="signupName" type="text" placeholder="Nome completo">
+      <input id="signupEmail" type="email" placeholder="Email">
+      <input id="signupPassword" type="password" placeholder="Senha">
+      <select id="signupRole">
+        <option value="student">Aluno</option>
+        <option value="teacher">Professor</option>
+      </select>
+      <input id="signupGrade" type="number" placeholder="Série (1-9)" min="1" max="9">
+      <button id="btnSignupAction">Registrar</button>
+      <p>Já tem conta? <a href="#" id="linkShowLogin">Entrar</a></p>
+    </div>
+  </div>
+</div>
+
 <!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <img src="lunna.png" alt="Lunna" class="loading-mascot-img">

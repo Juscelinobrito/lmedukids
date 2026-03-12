@@ -198,6 +198,51 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 32px;
+  }
+
+  /* Auth overlay */
+  .auth-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .auth-box {
+    background: #ffffff;
+    padding: 32px 24px;
+    border-radius: 16px;
+    width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+  .auth-box input, .auth-box select {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .auth-box button {
+    width: 100%;
+    padding: 10px 0;
+    margin: 12px 0 4px;
+    background: var(--coral);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background .2s;
+  }
+  .auth-box button:hover { background: #ff5a5a; }
+  .auth-box p { font-size: 13px; margin-top: 8px; }
+  .auth-box a { color: var(--sky); text-decoration: none; font-weight: 700; }
+
     margin-bottom: 24px;
     border: 3px dashed transparent;
     transition: all 0.3s ease;
