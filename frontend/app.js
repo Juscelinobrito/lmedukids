@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
+  const debug = document.getElementById('debugBanner');
+  if (debug) debug.textContent = 'JS: carregado (iniciando autenticação...)';
+
 const API_KEY_MISSING_MSG = "Para usar o LM EduKids, configure sua chave da API Gemini.";
 
 // ----------------- Autenticação -----------------
@@ -44,9 +47,11 @@ async function initAuth() {
     }
   } catch (err) {
     console.error('Erro ao inicializar autenticação:', err);
+    if (debug) debug.textContent = 'JS: houve erro no initAuth (veja console)';
     showLogin();
   }
 }
+
 
 function showLogin() {
   document.getElementById('authOverlay').style.display = 'flex';
