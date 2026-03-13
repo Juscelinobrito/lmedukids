@@ -77,6 +77,7 @@ function updateUserUI() {
     userWhatsappEl.textContent = formatWhatsapp(currentProfile.whatsapp);
     userWhatsappEl.style.display = currentProfile.whatsapp ? 'block' : 'none';
     userActions.style.display = 'flex';
+    updateProfilePanel();
   } else {
     userActions.style.display = 'none';
   }
@@ -92,8 +93,79 @@ function formatWhatsapp(value) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
 }
 
+function formatRole(role) {
+  if (role === 'student') return 'Aluno';
+  if (role === 'teacher') return 'Professor / Responsável';
+  return role || 'Não informado';
+}
+
+function formatGrade(grade) {
+  return grade ? `${grade}º ano` : 'Não informado';
+}
+
+function formatDate(dateValue) {
+  if (!dateValue) return 'Não informado';
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return 'Não informado';
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(date);
+}
+
+function updateProfilePanel() {
+  const profileName = document.getElementById('profileName');
+  const profileRole = document.getElementById('profileRole');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileWhatsapp = document.getElementById('profileWhatsapp');
+  const profileGrade = document.getElementById('profileGrade');
+  const profileCreatedAt = document.getElementById('profileCreatedAt');
+  const profileAvatar = document.getElementById('profileAvatar');
+  const profileSummary = document.getElementById('profileSummary');
+
+  if (!profileName || !profileRole || !profileEmail || !profileWhatsapp || !profileGrade || !profileCreatedAt || !profileAvatar || !profileSummary) return;
+
+  profileName.textContent = currentProfile?.name || 'Usuário';
+  profileRole.textContent = formatRole(currentProfile?.role);
+  profileEmail.textContent = currentProfile?.email || currentUser?.email || 'Não informado';
+  profileWhatsapp.textContent = formatWhatsapp(currentProfile?.whatsapp) || 'Não informado';
+  profileGrade.textContent = formatGrade(currentProfile?.grade);
+  profileCreatedAt.textContent = formatDate(currentProfile?.created_at);
+  profileAvatar.textContent = (currentProfile?.name || currentUser?.email || 'U').trim().charAt(0).toUpperCase();
+  profileSummary.textContent = `${formatRole(currentProfile?.role)} com acesso ao LM EduKids. Seus dados principais aparecem aqui para consulta rápida.`;
+}
+
+function showProfile() {
+  updateProfilePanel();
+  const overlay = document.getElementById('profileOverlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+function hideProfile() {
+  const overlay = document.getElementById('profileOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
 // hook up authenticated actions after DOM elements exist
 setTimeout(() => {
+  const btnProfile = document.getElementById('btnProfile');
+  if (btnProfile) {
+    btnProfile.addEventListener('click', showProfile);
+  }
+
+  const btnCloseProfile = document.getElementById('btnCloseProfile');
+  if (btnCloseProfile) {
+    btnCloseProfile.addEventListener('click', hideProfile);
+  }
+
+  const profileOverlay = document.getElementById('profileOverlay');
+  if (profileOverlay) {
+    profileOverlay.addEventListener('click', (event) => {
+      if (event.target === profileOverlay) hideProfile();
+    });
+  }
+
   const btnLogout = document.getElementById('btnLogout');
   if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
@@ -105,6 +177,7 @@ setTimeout(() => {
       }
       currentUser = null;
       currentProfile = null;
+      hideProfile();
       updateUserUI();
       window.location.replace('/');
     });
