@@ -1,80 +1,187 @@
-document.addEventListener("DOMContentLoaded", function() {
+import { initSupabase, getSupabaseConfig, getCurrentUser } from './supabase.js';
+
+const debug = document.getElementById('debugBanner');
+if (debug) debug.textContent = 'JS: carregado (iniciando autenticação...)';
+
 const API_KEY_MISSING_MSG = "Para usar o LM EduKids, configure sua chave da API Gemini.";
+
+function initApp() {
+  initAuth();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // ----------------- Autenticação -----------------
 let currentUser = null;
 let currentProfile = null;
 
 async function initAuth() {
-  const { getCurrentUser, loginUser, signUpUser } = await import('./supabase.js');
-  const { user, profile } = await getCurrentUser();
-  if (!user) {
-    showLogin();
-  } else {
-    currentUser = user;
-    currentProfile = profile;
-    console.log('Usuário já autenticado:', profile?.name);
+  if (debug) debug.textContent = 'JS: import supabase ok';
+
+  // Tenta carregar config da janela (útil para local) e, se não existir, busca do backend
+  const windowConfig = getSupabaseConfig();
+  let config = {
+    url: windowConfig.url,
+    anonKey: windowConfig.anonKey,
+  };
+
+  if (!config.url || !config.anonKey) {
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) {
+        const serverConfig = await res.json();
+        config = {
+          url: serverConfig.SUPABASE_URL || serverConfig.url,
+          anonKey: serverConfig.SUPABASE_ANON_KEY || serverConfig.anonKey,
+        };
+      }
+    } catch (err) {
+      console.warn('Não foi possível carregar configuração do Supabase:', err);
+    }
+  }
+
+  initSupabase({ url: config.url, anonKey: config.anonKey });
+
+  try {
+    if (debug) debug.textContent = 'JS: consultando sessão atual...';
+    const { user, profile } = await getCurrentUser();
+    if (!user) {
+      if (debug) debug.textContent = 'JS: sem sessão -> redirecionando para /';
+      window.location.replace('/');
+      return;
+    } else {
+      currentUser = user;
+      currentProfile = profile;
+      updateUserUI();
+      if (debug) debug.textContent = `JS: usuário autenticado (${profile?.name || 'sem nome'})`;
+      console.log('Usuário já autenticado:', profile?.name);
+    }
+  } catch (err) {
+    console.error('Erro ao inicializar autenticação:', err);
+    if (debug) debug.textContent = 'JS: erro no initAuth (veja console)';
+    window.location.replace('/');
   }
 }
 
-function showLogin() {
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('authTitle').textContent = 'Entrar';
-  document.getElementById('loginForm').style.display = 'block';
-  document.getElementById('signupForm').style.display = 'none';
+function updateUserUI() {
+  const userActions = document.getElementById('userActions');
+  const userNameEl = document.getElementById('userName');
+  const userWhatsappEl = document.getElementById('userWhatsapp');
+  if (!userActions || !userNameEl || !userWhatsappEl) return;
+  if (currentProfile?.name) {
+    userNameEl.textContent = currentProfile.name;
+    userWhatsappEl.textContent = formatWhatsapp(currentProfile.whatsapp);
+    userWhatsappEl.style.display = currentProfile.whatsapp ? 'block' : 'none';
+    userActions.style.display = 'flex';
+    updateProfilePanel();
+  } else {
+    userActions.style.display = 'none';
+  }
 }
 
-function showSignup() {
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('authTitle').textContent = 'Registrar';
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('signupForm').style.display = 'block';
+function formatWhatsapp(value) {
+  const digits = (value || '').replace(/\D/g, '');
+
+  if (!digits) return '';
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
 }
 
-async function handleLogin() {
-  const email = document.getElementById('authEmail').value;
-  const password = document.getElementById('authPassword').value;
-  const { loginUser, getCurrentUser } = await import('./supabase.js');
-  const { user, profile, error } = await loginUser(email, password);
-  if (error) return alert('❌ ' + error.message);
-  currentUser = user;
-  currentProfile = profile;
-  document.getElementById('authOverlay').style.display = 'none';
-  console.log('Logado como', profile.name);
+function formatRole(role) {
+  if (role === 'student') return 'Aluno';
+  if (role === 'teacher') return 'Professor / Responsável';
+  return role || 'Não informado';
 }
 
-async function handleSignup() {
-  const name = document.getElementById('signupName').value;
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  const role = document.getElementById('signupRole').value;
-  const grade = document.getElementById('signupGrade').value || null;
-  const { signUpUser } = await import('./supabase.js');
-  const { user, profile, error } = await signUpUser(email, password, name, role, grade);
-  if (error) return alert('❌ ' + error.message);
-  alert('✅ Registrado! Faça login agora.');
-  showLogin();
+function formatGrade(grade) {
+  return grade ? `${grade}º ano` : 'Não informado';
 }
 
-// attach event listeners
-window.showLogin = showLogin;
-window.showSignup = showSignup;
-window.handleLogin = handleLogin;
-window.handleSignup = handleSignup;
+function formatDate(dateValue) {
+  if (!dateValue) return 'Não informado';
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return 'Não informado';
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(date);
+}
 
-// initialize authentication before anything else
-initAuth();
+function updateProfilePanel() {
+  const profileName = document.getElementById('profileName');
+  const profileRole = document.getElementById('profileRole');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileWhatsapp = document.getElementById('profileWhatsapp');
+  const profileGrade = document.getElementById('profileGrade');
+  const profileCreatedAt = document.getElementById('profileCreatedAt');
+  const profileAvatar = document.getElementById('profileAvatar');
+  const profileSummary = document.getElementById('profileSummary');
 
-// hook up modal buttons/links after DOM elements exist
+  if (!profileName || !profileRole || !profileEmail || !profileWhatsapp || !profileGrade || !profileCreatedAt || !profileAvatar || !profileSummary) return;
+
+  profileName.textContent = currentProfile?.name || 'Usuário';
+  profileRole.textContent = formatRole(currentProfile?.role);
+  profileEmail.textContent = currentProfile?.email || currentUser?.email || 'Não informado';
+  profileWhatsapp.textContent = formatWhatsapp(currentProfile?.whatsapp) || 'Não informado';
+  profileGrade.textContent = formatGrade(currentProfile?.grade);
+  profileCreatedAt.textContent = formatDate(currentProfile?.created_at);
+  profileAvatar.textContent = (currentProfile?.name || currentUser?.email || 'U').trim().charAt(0).toUpperCase();
+  profileSummary.textContent = `${formatRole(currentProfile?.role)} com acesso ao LM EduKids. Seus dados principais aparecem aqui para consulta rápida.`;
+}
+
+function showProfile() {
+  updateProfilePanel();
+  const overlay = document.getElementById('profileOverlay');
+  if (overlay) overlay.style.display = 'flex';
+}
+
+function hideProfile() {
+  const overlay = document.getElementById('profileOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+// hook up authenticated actions after DOM elements exist
 setTimeout(() => {
-  const btnAuth = document.getElementById('btnAuthAction');
-  const btnSignup = document.getElementById('btnSignupAction');
-  const linkToSignup = document.getElementById('linkShowSignup');
-  const linkToLogin = document.getElementById('linkShowLogin');
-  if (btnAuth) btnAuth.addEventListener('click', handleLogin);
-  if (btnSignup) btnSignup.addEventListener('click', handleSignup);
-  if (linkToSignup) linkToSignup.addEventListener('click', e => { e.preventDefault(); showSignup(); });
-  if (linkToLogin) linkToLogin.addEventListener('click', e => { e.preventDefault(); showLogin(); });
+  const btnProfile = document.getElementById('btnProfile');
+  if (btnProfile) {
+    btnProfile.addEventListener('click', showProfile);
+  }
+
+  const btnCloseProfile = document.getElementById('btnCloseProfile');
+  if (btnCloseProfile) {
+    btnCloseProfile.addEventListener('click', hideProfile);
+  }
+
+  const profileOverlay = document.getElementById('profileOverlay');
+  if (profileOverlay) {
+    profileOverlay.addEventListener('click', (event) => {
+      if (event.target === profileOverlay) hideProfile();
+    });
+  }
+
+  const btnLogout = document.getElementById('btnLogout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      try {
+        const { logoutUser } = await import('./supabase.js');
+        await logoutUser();
+      } catch (err) {
+        console.warn('Erro ao deslogar:', err);
+      }
+      currentUser = null;
+      currentProfile = null;
+      hideProfile();
+      updateUserUI();
+      window.location.replace('/');
+    });
+  }
 }, 500);
 
 
@@ -97,7 +204,7 @@ let FEATURES = {
 // Carregar features do servidor
 async function loadFeatures() {
   try {
-    const response = await fetch('http://localhost:3456/api/features');
+    const response = await fetch('/api/features');
     if (response.ok) {
       const data = await response.json();
       FEATURES = data.features || FEATURES;
@@ -277,7 +384,7 @@ async function analyzeTask() {
 
   try {
     // Envia imagem + série para o backend Gemini
-    const response = await fetch('http://localhost:3456/api/messages', {
+    const response = await fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -749,7 +856,7 @@ document.getElementById('profAnalyzeBtn').addEventListener('click', async () => 
   showLoading('Lendo a atividade... 🔍', 'Identificando disciplina... 📚', 'Extraindo texto... ✍️', 'Quase pronto... ⚡');
 
   try {
-    const res = await fetch('http://localhost:3456/api/adapt', {
+    const res = await fetch('/api/adapt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -806,7 +913,7 @@ document.querySelectorAll('.adapt-btn').forEach(btn => {
     showLoading('Gerando adaptação... ✨', 'Processando conteúdo... 🧠', 'Criando versão adaptada... 📝', 'Quase lá... 🚀');
 
     try {
-      const res = await fetch('http://localhost:3456/api/adapt', {
+      const res = await fetch('/api/adapt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -997,4 +1104,3 @@ function hideLoading() {
 }
 
 }); // fim DOMContentLoaded
-

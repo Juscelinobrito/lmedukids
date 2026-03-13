@@ -3,56 +3,98 @@
  * Inicializa conexão com Supabase para autenticação e banco de dados
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://ndmccxupbrplljalqegh.supabase.co';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+let _supabaseClient = null;
 
-// Validar chaves
-if (!SUPABASE_URL) {
-  console.error('❌ VITE_SUPABASE_URL não configurada');
+export function initSupabase({ url, anonKey }) {
+  if (!url || !anonKey) {
+    console.error('❌ Supabase URL/ANON_KEY não configurados');
+    return;
+  }
+
+  _supabaseClient = createClient(url, anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
 }
 
-if (!SUPABASE_ANON_KEY) {
-  console.error('❌ VITE_SUPABASE_ANON_KEY não configurada');
-}
-
-// Cliente Supabase
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
+export const supabase = new Proxy({}, {
+  get(_, prop) {
+    if (!_supabaseClient) {
+      throw new Error('Supabase não inicializado. Chame initSupabase() antes de usar.');
+    }
+    // @ts-ignore
+    return _supabaseClient[prop];
+  }
 });
+
+function getConfigFromWindow() {
+  // Suporte a injeção de vars via <script> no index.html (útil para deploys estáticos)
+  return {
+    url: window.SUPABASE_URL || window.__LMEDUKIDS_SUPABASE_URL || null,
+    anonKey: window.SUPABASE_ANON_KEY || window.__LMEDUKIDS_SUPABASE_ANON_KEY || null,
+  };
+}
+
+export function getSupabaseConfig() {
+  return getConfigFromWindow();
+}
 
 /**
  * Authentication Functions
  */
 
 // Signup
-export const signUpUser = async (email, password, name, role = 'student', grade = null) => {
+export const signUpUser = async (email, password, name, role = 'student', grade = null, whatsapp = null) => {
   try {
     // 1. Criar user na autenticação
     const { data: { user }, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name,
+          role,
+          grade: role === 'student' ? grade : null,
+          whatsapp,
+        },
+      },
     });
 
     if (signUpError) throw signUpError;
 
     // 2. Criar perfil na tabela users
-    const { data: profile, error: profileError } = await supabase
+    const baseProfile = {
+      id: user.id,
+      email,
+      name,
+      role,
+      grade: role === 'student' ? grade : null,
+    };
+
+    let profileResponse = await supabase
       .from('users')
       .insert([{
-        id: user.id,
-        email,
-        name,
-        role,
-        grade: role === 'student' ? grade : null,
+        ...baseProfile,
+        whatsapp,
       }])
       .select()
       .single();
+
+    // Fallback para bancos ainda sem a coluna whatsapp aplicada.
+    if (profileResponse.error && whatsapp) {
+      profileResponse = await supabase
+        .from('users')
+        .insert([baseProfile])
+        .select()
+        .single();
+    }
+
+    const { data: profile, error: profileError } = profileResponse;
 
     if (profileError) throw profileError;
 

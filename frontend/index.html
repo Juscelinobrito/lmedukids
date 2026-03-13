@@ -16,31 +16,6 @@
   <div class="shape"></div>
 </div>
 
-<!-- Authentication Modal (login/signup) -->
-<div id="authOverlay" class="auth-overlay" style="display:none;">
-  <div class="auth-box">
-    <h2 id="authTitle">Entrar</h2>
-    <div id="loginForm">
-      <input id="authEmail" type="email" placeholder="Email">
-      <input id="authPassword" type="password" placeholder="Senha">
-      <button id="btnAuthAction">Entrar</button>
-      <p>Não tem conta? <a href="#" id="linkShowSignup">Registrar</a></p>
-    </div>
-    <div id="signupForm" style="display:none;">
-      <input id="signupName" type="text" placeholder="Nome completo">
-      <input id="signupEmail" type="email" placeholder="Email">
-      <input id="signupPassword" type="password" placeholder="Senha">
-      <select id="signupRole">
-        <option value="student">Aluno</option>
-        <option value="teacher">Professor</option>
-      </select>
-      <input id="signupGrade" type="number" placeholder="Série (1-9)" min="1" max="9">
-      <button id="btnSignupAction">Registrar</button>
-      <p>Já tem conta? <a href="#" id="linkShowLogin">Entrar</a></p>
-    </div>
-  </div>
-</div>
-
 <!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <img src="lunna.png" alt="Lunna" class="loading-mascot-img">
@@ -62,8 +37,21 @@
   </div>
   <div class="header-right">
     <div class="stars-badge" id="starsBadge">⭐ <span id="starCount">0</span> estrelas</div>
+    <div class="user-actions" id="userActions" style="display:none;">
+      <div class="user-meta">
+        <span class="user-name" id="userName"></span>
+        <span class="user-whatsapp" id="userWhatsapp"></span>
+      </div>
+      <button class="profile-btn" id="btnProfile">Perfil</button>
+      <button class="logout-btn" id="btnLogout">Sair</button>
+    </div>
   </div>
 </header>
+
+<!-- DEBUG: mostra se o JS está carregando -->
+<div id="debugBanner" style="position:fixed;bottom:12px;left:12px;z-index:9999;padding:8px 12px;background:rgba(0,0,0,0.6);color:#fff;font-size:12px;border-radius:12px;">
+  JS: aguardando carregamento...
+</div>
 
 <!-- ── Seletor de Modo ──────────────────────────────────────────── -->
 <div class="mode-switcher-wrap">
@@ -417,7 +405,44 @@
 
 </div><!-- /container -->
 
+<div class="profile-overlay" id="profileOverlay" style="display:none;">
+  <div class="profile-panel">
+    <button class="profile-close" id="btnCloseProfile" aria-label="Fechar perfil">×</button>
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profileAvatar">U</div>
+      <div>
+        <h2 id="profileName">Usuário</h2>
+        <p id="profileRole">Perfil</p>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <div class="profile-card">
+        <span class="profile-label">Email</span>
+        <strong id="profileEmail">-</strong>
+      </div>
+      <div class="profile-card">
+        <span class="profile-label">WhatsApp</span>
+        <strong id="profileWhatsapp">-</strong>
+      </div>
+      <div class="profile-card">
+        <span class="profile-label">Série</span>
+        <strong id="profileGrade">-</strong>
+      </div>
+      <div class="profile-card">
+        <span class="profile-label">Cadastro</span>
+        <strong id="profileCreatedAt">-</strong>
+      </div>
+    </div>
+
+    <div class="profile-notes">
+      <h3>Resumo do perfil</h3>
+      <p id="profileSummary">Seus dados de acesso e contato aparecem aqui.</p>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="app.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

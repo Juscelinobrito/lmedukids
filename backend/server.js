@@ -121,6 +121,14 @@ app.get('/api/features', (req, res) => {
   });
 });
 
+// ─── Expor configurações de frontend (para deploys estáticos) ────────────────
+app.get('/api/config', (req, res) => {
+  res.json({
+    SUPABASE_URL: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || null,
+    SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || null,
+  });
+});
+
 // ─── Proxy para a API OpenAI ─────────────────────────────────────────────────
 app.post('/api/messages', async (req, res) => {
   if (!API_KEY) {

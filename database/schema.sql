@@ -13,6 +13,7 @@ CREATE TABLE users (
   name VARCHAR(255) NOT NULL,
   role VARCHAR(20) NOT NULL CHECK (role IN ('student', 'teacher')), -- 'student' ou 'teacher'
   grade INTEGER,  -- Série (1-9) - apenas para alunos
+  whatsapp VARCHAR(20),
   school VARCHAR(255),
   profile_picture_url TEXT,
   bio TEXT,
