@@ -42,8 +42,8 @@
         <span class="user-name" id="userName"></span>
         <span class="user-whatsapp" id="userWhatsapp"></span>
       </div>
-      <button class="profile-btn" id="btnProfile">Perfil</button>
-      <button class="logout-btn" id="btnLogout">Sair</button>
+      <button class="profile-btn" id="btnProfile" type="button" onclick="window.showProfile?.()">Perfil</button>
+      <button class="logout-btn" id="btnLogout" type="button" onclick="window.handleLogout?.()">Sair</button>
     </div>
   </div>
 </header>
@@ -400,9 +400,9 @@
 
 </div><!-- /container -->
 
-<div class="profile-overlay" id="profileOverlay" style="display:none;">
+<div class="profile-overlay" id="profileOverlay" style="display:none;" onclick="if (event.target === this) window.hideProfile?.()">
   <div class="profile-panel">
-    <button class="profile-close" id="btnCloseProfile" aria-label="Fechar perfil">×</button>
+    <button class="profile-close" id="btnCloseProfile" type="button" aria-label="Fechar perfil" onclick="window.hideProfile?.()">×</button>
     <div class="profile-hero">
       <div class="profile-avatar" id="profileAvatar">U</div>
       <div>

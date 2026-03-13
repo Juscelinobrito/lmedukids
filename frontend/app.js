@@ -154,6 +154,10 @@ async function handleLogout() {
   window.location.replace('/');
 }
 
+window.showProfile = showProfile;
+window.hideProfile = hideProfile;
+window.handleLogout = handleLogout;
+
 // Hook up authenticated actions as soon as the app script loads.
 {
   const btnProfile = document.getElementById('btnProfile');
