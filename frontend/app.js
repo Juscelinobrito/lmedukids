@@ -89,17 +89,17 @@ function formatWhatsapp(value) {
 function formatRole(role) {
   if (role === 'student') return 'Aluno';
   if (role === 'teacher') return 'Professor / Responsável';
-  return role || 'Não informado';
+  return role || '-';
 }
 
 function formatGrade(grade) {
-  return grade ? `${grade}º ano` : 'Não informado';
+  return grade ? `${grade}º ano` : '-';
 }
 
 function formatDate(dateValue) {
-  if (!dateValue) return 'Não informado';
+  if (!dateValue) return '-';
   const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return 'Não informado';
+  if (Number.isNaN(date.getTime())) return '-';
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
@@ -121,8 +121,8 @@ function updateProfilePanel() {
 
   profileName.textContent = currentProfile?.name || currentUser?.email || 'Usuario';
   profileRole.textContent = formatRole(currentProfile?.role);
-  profileEmail.textContent = currentProfile?.email || currentUser?.email || 'Não informado';
-  profileWhatsapp.textContent = formatWhatsapp(currentProfile?.whatsapp) || 'Não informado';
+  profileEmail.textContent = currentProfile?.email || currentUser?.email || '-';
+  profileWhatsapp.textContent = formatWhatsapp(currentProfile?.whatsapp) || '-';
   profileGrade.textContent = formatGrade(currentProfile?.grade);
   profileCreatedAt.textContent = formatDate(currentProfile?.created_at);
   profileAvatar.textContent = (currentProfile?.name || currentUser?.email || 'U').trim().charAt(0).toUpperCase();
