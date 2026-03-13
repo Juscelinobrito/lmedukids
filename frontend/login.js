@@ -1,4 +1,10 @@
-import { initSupabase, getSupabaseConfig, getCurrentUser, loginUser, signUpUser } from './supabase.js';
+import {
+  getCurrentUser,
+  getSupabaseConfig,
+  initSupabase,
+  loginUser,
+  signUpUserWithTrigger,
+} from './supabase.js';
 
 async function loadSupabaseConfig() {
   const windowConfig = getSupabaseConfig();
@@ -69,7 +75,7 @@ async function handleLogin() {
   const { error } = await loginUser(email, password);
 
   if (error) {
-    setFeedback(error.message || 'Não foi possível entrar.', true);
+    setFeedback(error.message || 'Nao foi possivel entrar.', true);
     return;
   }
 
@@ -86,20 +92,31 @@ async function handleSignup() {
   const grade = document.getElementById('signupGrade').value || null;
 
   if (whatsapp && !isValidWhatsapp(whatsapp)) {
-    setFeedback('Informe um WhatsApp válido com DDD.', true);
+    setFeedback('Informe um WhatsApp valido com DDD.', true);
     whatsappInput.focus();
     return;
   }
 
-  const { error } = await signUpUser(email, password, name, role, grade, whatsapp);
+  const { error, pendingConfirmation } = await signUpUserWithTrigger(
+    email,
+    password,
+    name,
+    role,
+    grade,
+    whatsapp
+  );
 
   if (error) {
-    setFeedback(error.message || 'Não foi possível registrar.', true);
+    setFeedback(error.message || 'Nao foi possivel registrar.', true);
     return;
   }
 
   showLogin();
-  setFeedback('Cadastro realizado. Faça login para continuar.');
+  setFeedback(
+    pendingConfirmation
+      ? 'Cadastro realizado. Verifique seu email para confirmar a conta antes de entrar.'
+      : 'Cadastro realizado. Faca login para continuar.'
+  );
 }
 
 async function initLoginPage() {
@@ -114,7 +131,7 @@ async function initLoginPage() {
     }
   } catch (error) {
     console.error('Erro ao inicializar login:', error);
-    setFeedback('Não foi possível carregar a autenticação.', true);
+    setFeedback('Nao foi possivel carregar a autenticacao.', true);
   }
 
   document.getElementById('btnAuthAction').addEventListener('click', handleLogin);

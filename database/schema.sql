@@ -165,6 +165,9 @@ ALTER TABLE student_progress ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own data" ON users
   FOR SELECT USING (auth.uid() = id);
 
+CREATE POLICY "Users can insert own data" ON users
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
 CREATE POLICY "Users can update own data" ON users
   FOR UPDATE USING (auth.uid() = id);
 
@@ -191,6 +194,15 @@ CREATE POLICY "Teachers can view own content" ON teacher_content
 
 CREATE POLICY "Teachers can insert content" ON teacher_content
   FOR INSERT WITH CHECK (auth.uid() = teacher_id);
+
+CREATE POLICY "Students can view own progress" ON student_progress
+  FOR SELECT USING (auth.uid() = student_id);
+
+CREATE POLICY "Students can insert own progress" ON student_progress
+  FOR INSERT WITH CHECK (auth.uid() = student_id);
+
+CREATE POLICY "Students can update own progress" ON student_progress
+  FOR UPDATE USING (auth.uid() = student_id);
 
 -- ============================================================================
 -- 9. FUNCIÓN: Update updated_at (Trigger Automático)

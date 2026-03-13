@@ -404,3 +404,53 @@ export const uploadUserAvatar = async (userId, file) => {
     return { publicUrl: null, error };
   }
 };
+
+export const signUpUserWithTrigger = async (
+  email,
+  password,
+  name,
+  role = 'student',
+  grade = null,
+  whatsapp = null
+) => {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          role,
+          grade: role === 'student' ? grade : null,
+          whatsapp,
+        },
+      },
+    });
+
+    if (error) throw error;
+
+    let profile = null;
+    const user = data.user;
+
+    if (data.session && user) {
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const profileResponse = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profileResponse.data) {
+          profile = profileResponse.data;
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+    }
+
+    return { user, profile, pendingConfirmation: !data.session, error: null };
+  } catch (error) {
+    return { user: null, profile: null, pendingConfirmation: false, error };
+  }
+};
