@@ -1,15 +1,26 @@
-document.addEventListener("DOMContentLoaded", function() {
-  const debug = document.getElementById('debugBanner');
-  if (debug) debug.textContent = 'JS: carregado (iniciando autenticação...)';
+import { initSupabase, getSupabaseConfig, getCurrentUser, loginUser, signUpUser, logoutUser } from './supabase.js';
+
+const debug = document.getElementById('debugBanner');
+if (debug) debug.textContent = 'JS: carregado (iniciando autenticação...)';
 
 const API_KEY_MISSING_MSG = "Para usar o LM EduKids, configure sua chave da API Gemini.";
+
+function initApp() {
+  initAuth();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // ----------------- Autenticação -----------------
 let currentUser = null;
 let currentProfile = null;
 
 async function initAuth() {
-  const { initSupabase, getSupabaseConfig, getCurrentUser } = await import('./supabase.js');
+  if (debug) debug.textContent = 'JS: import supabase ok';
 
   // Tenta carregar config da janela (útil para local) e, se não existir, busca do backend
   const windowConfig = getSupabaseConfig();
@@ -36,18 +47,21 @@ async function initAuth() {
   initSupabase({ url: config.url, anonKey: config.anonKey });
 
   try {
+    if (debug) debug.textContent = 'JS: consultando sessão atual...';
     const { user, profile } = await getCurrentUser();
     if (!user) {
+      if (debug) debug.textContent = 'JS: sem sessão -> mostra login';
       showLogin();
     } else {
       currentUser = user;
       currentProfile = profile;
       updateUserUI();
+      if (debug) debug.textContent = `JS: usuário autenticado (${profile?.name || 'sem nome'})`;
       console.log('Usuário já autenticado:', profile?.name);
     }
   } catch (err) {
     console.error('Erro ao inicializar autenticação:', err);
-    if (debug) debug.textContent = 'JS: houve erro no initAuth (veja console)';
+    if (debug) debug.textContent = 'JS: erro no initAuth (veja console)';
     showLogin();
   }
 }
