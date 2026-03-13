@@ -130,6 +130,36 @@
     box-shadow: 0 3px 12px rgba(255,189,89,0.4);
   }
 
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .user-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+  }
+
+  .logout-btn {
+    border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .logout-btn:hover {
+    background: rgba(255,255,255,0.25);
+  }
+
   /* Main container */
   .container {
     position: relative;

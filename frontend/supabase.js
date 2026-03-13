@@ -5,26 +5,44 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://ndmccxupbrplljalqegh.supabase.co';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+let _supabaseClient = null;
 
-// Validar chaves
-if (!SUPABASE_URL) {
-  console.error('❌ VITE_SUPABASE_URL não configurada');
+export function initSupabase({ url, anonKey }) {
+  if (!url || !anonKey) {
+    console.error('❌ Supabase URL/ANON_KEY não configurados');
+    return;
+  }
+
+  _supabaseClient = createClient(url, anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
 }
 
-if (!SUPABASE_ANON_KEY) {
-  console.error('❌ VITE_SUPABASE_ANON_KEY não configurada');
-}
-
-// Cliente Supabase
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
+export const supabase = new Proxy({}, {
+  get(_, prop) {
+    if (!_supabaseClient) {
+      throw new Error('Supabase não inicializado. Chame initSupabase() antes de usar.');
+    }
+    // @ts-ignore
+    return _supabaseClient[prop];
+  }
 });
+
+function getConfigFromWindow() {
+  // Suporte a injeção de vars via <script> no index.html (útil para deploys estáticos)
+  return {
+    url: window.SUPABASE_URL || window.__LMEDUKIDS_SUPABASE_URL || null,
+    anonKey: window.SUPABASE_ANON_KEY || window.__LMEDUKIDS_SUPABASE_ANON_KEY || null,
+  };
+}
+
+export function getSupabaseConfig() {
+  return getConfigFromWindow();
+}
 
 /**
  * Authentication Functions

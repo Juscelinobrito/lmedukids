@@ -6,14 +6,45 @@ let currentUser = null;
 let currentProfile = null;
 
 async function initAuth() {
-  const { getCurrentUser, loginUser, signUpUser } = await import('./supabase.js');
-  const { user, profile } = await getCurrentUser();
-  if (!user) {
+  const { initSupabase, getSupabaseConfig, getCurrentUser } = await import('./supabase.js');
+
+  // Tenta carregar config da janela (útil para local) e, se não existir, busca do backend
+  const windowConfig = getSupabaseConfig();
+  let config = {
+    url: windowConfig.url,
+    anonKey: windowConfig.anonKey,
+  };
+
+  if (!config.url || !config.anonKey) {
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) {
+        const serverConfig = await res.json();
+        config = {
+          url: serverConfig.SUPABASE_URL || serverConfig.url,
+          anonKey: serverConfig.SUPABASE_ANON_KEY || serverConfig.anonKey,
+        };
+      }
+    } catch (err) {
+      console.warn('Não foi possível carregar configuração do Supabase:', err);
+    }
+  }
+
+  initSupabase({ url: config.url, anonKey: config.anonKey });
+
+  try {
+    const { user, profile } = await getCurrentUser();
+    if (!user) {
+      showLogin();
+    } else {
+      currentUser = user;
+      currentProfile = profile;
+      updateUserUI();
+      console.log('Usuário já autenticado:', profile?.name);
+    }
+  } catch (err) {
+    console.error('Erro ao inicializar autenticação:', err);
     showLogin();
-  } else {
-    currentUser = user;
-    currentProfile = profile;
-    console.log('Usuário já autenticado:', profile?.name);
   }
 }
 
@@ -31,6 +62,17 @@ function showSignup() {
   document.getElementById('signupForm').style.display = 'block';
 }
 
+function updateUserUI() {
+  const userActions = document.getElementById('userActions');
+  const userNameEl = document.getElementById('userName');
+  if (currentProfile?.name) {
+    userNameEl.textContent = currentProfile.name;
+    userActions.style.display = 'flex';
+  } else {
+    userActions.style.display = 'none';
+  }
+}
+
 async function handleLogin() {
   const email = document.getElementById('authEmail').value;
   const password = document.getElementById('authPassword').value;
@@ -39,6 +81,7 @@ async function handleLogin() {
   if (error) return alert('❌ ' + error.message);
   currentUser = user;
   currentProfile = profile;
+  updateUserUI();
   document.getElementById('authOverlay').style.display = 'none';
   console.log('Logado como', profile.name);
 }
@@ -75,6 +118,22 @@ setTimeout(() => {
   if (btnSignup) btnSignup.addEventListener('click', handleSignup);
   if (linkToSignup) linkToSignup.addEventListener('click', e => { e.preventDefault(); showSignup(); });
   if (linkToLogin) linkToLogin.addEventListener('click', e => { e.preventDefault(); showLogin(); });
+
+  const btnLogout = document.getElementById('btnLogout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      try {
+        const { logoutUser } = await import('./supabase.js');
+        await logoutUser();
+      } catch (err) {
+        console.warn('Erro ao deslogar:', err);
+      }
+      currentUser = null;
+      currentProfile = null;
+      updateUserUI();
+      showLogin();
+    });
+  }
 }, 500);
 
 
@@ -97,7 +156,7 @@ let FEATURES = {
 // Carregar features do servidor
 async function loadFeatures() {
   try {
-    const response = await fetch('http://localhost:3456/api/features');
+    const response = await fetch('/api/features');
     if (response.ok) {
       const data = await response.json();
       FEATURES = data.features || FEATURES;
@@ -277,7 +336,7 @@ async function analyzeTask() {
 
   try {
     // Envia imagem + série para o backend Gemini
-    const response = await fetch('http://localhost:3456/api/messages', {
+    const response = await fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -749,7 +808,7 @@ document.getElementById('profAnalyzeBtn').addEventListener('click', async () => 
   showLoading('Lendo a atividade... 🔍', 'Identificando disciplina... 📚', 'Extraindo texto... ✍️', 'Quase pronto... ⚡');
 
   try {
-    const res = await fetch('http://localhost:3456/api/adapt', {
+    const res = await fetch('/api/adapt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -806,7 +865,7 @@ document.querySelectorAll('.adapt-btn').forEach(btn => {
     showLoading('Gerando adaptação... ✨', 'Processando conteúdo... 🧠', 'Criando versão adaptada... 📝', 'Quase lá... 🚀');
 
     try {
-      const res = await fetch('http://localhost:3456/api/adapt', {
+      const res = await fetch('/api/adapt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
