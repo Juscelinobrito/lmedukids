@@ -1131,5 +1131,3 @@ function hideLoading() {
   clearInterval(overlay._interval);
   overlay.classList.remove('active');
 }
-
-}); // fim DOMContentLoaded
