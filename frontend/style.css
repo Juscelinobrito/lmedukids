@@ -139,10 +139,22 @@
     background: rgba(255, 255, 255, 0.15);
   }
 
+  .user-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
   .user-name {
     font-weight: 700;
     font-size: 14px;
     color: #fff;
+  }
+
+  .user-whatsapp {
+    font-size: 11px;
+    color: rgba(255,255,255,0.82);
   }
 
   .logout-btn {

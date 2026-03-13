@@ -49,6 +49,20 @@ function normalizeWhatsapp(value) {
   return digits || null;
 }
 
+function formatWhatsapp(value) {
+  const digits = normalizeWhatsapp(value) || '';
+
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+}
+
+function isValidWhatsapp(value) {
+  const digits = normalizeWhatsapp(value) || '';
+  return digits.length === 10 || digits.length === 11;
+}
+
 async function handleLogin() {
   const email = document.getElementById('authEmail').value;
   const password = document.getElementById('authPassword').value;
@@ -65,10 +79,18 @@ async function handleLogin() {
 async function handleSignup() {
   const name = document.getElementById('signupName').value;
   const email = document.getElementById('signupEmail').value;
-  const whatsapp = normalizeWhatsapp(document.getElementById('signupWhatsapp').value);
+  const whatsappInput = document.getElementById('signupWhatsapp');
+  const whatsapp = normalizeWhatsapp(whatsappInput.value);
   const password = document.getElementById('signupPassword').value;
   const role = document.getElementById('signupRole').value;
   const grade = document.getElementById('signupGrade').value || null;
+
+  if (whatsapp && !isValidWhatsapp(whatsapp)) {
+    setFeedback('Informe um WhatsApp válido com DDD.', true);
+    whatsappInput.focus();
+    return;
+  }
+
   const { error } = await signUpUser(email, password, name, role, grade, whatsapp);
 
   if (error) {
@@ -97,6 +119,9 @@ async function initLoginPage() {
 
   document.getElementById('btnAuthAction').addEventListener('click', handleLogin);
   document.getElementById('btnSignupAction').addEventListener('click', handleSignup);
+  document.getElementById('signupWhatsapp').addEventListener('input', (event) => {
+    event.target.value = formatWhatsapp(event.target.value);
+  });
   document.getElementById('linkShowSignup').addEventListener('click', (event) => {
     event.preventDefault();
     showSignup();
