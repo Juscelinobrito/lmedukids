@@ -3,6 +3,8 @@ import {
   getSupabaseConfig,
   initSupabase,
   loginUser,
+  logoutUser,
+  isSuperAdminEmail,
   signUpUserWithTrigger,
 } from './supabase.js';
 
@@ -72,10 +74,16 @@ function isValidWhatsapp(value) {
 async function handleLogin() {
   const email = document.getElementById('authEmail').value;
   const password = document.getElementById('authPassword').value;
-  const { error } = await loginUser(email, password);
+  const { profile, error } = await loginUser(email, password);
 
   if (error) {
     setFeedback(error.message || 'Nao foi possivel entrar.', true);
+    return;
+  }
+
+  if (profile?.plan_type === 'trial' && profile?.trial_blocked && !isSuperAdminEmail(email)) {
+    await logoutUser();
+    setFeedback('Seu periodo de teste esta bloqueado. Entre em contato com o administrador.', true);
     return;
   }
 

@@ -1,4 +1,11 @@
-import { initSupabase, getSupabaseConfig, getCurrentUser } from './supabase.js';
+import {
+  initSupabase,
+  getSupabaseConfig,
+  getCurrentUser,
+  isSuperAdminEmail,
+  listAdminUsers,
+  updateUserAdminSettings
+} from './supabase.js';
 
 const API_KEY_MISSING_MSG = "Para usar o LM EduKids, configure sua chave da API Gemini.";
 
@@ -15,6 +22,12 @@ if (document.readyState === 'loading') {
 // ----------------- Autenticação -----------------
 let currentUser = null;
 let currentProfile = null;
+let currentIsSuperAdmin = false;
+let adminUsers = [];
+
+function isBlockedTrialUser(profile) {
+  return profile?.plan_type === 'trial' && profile?.trial_blocked;
+}
 
 async function initAuth() {
   // Tenta carregar config da janela (útil para local) e, se não existir, busca do backend
@@ -49,6 +62,12 @@ async function initAuth() {
     } else {
       currentUser = user;
       currentProfile = profile;
+      currentIsSuperAdmin = isSuperAdminEmail(user.email || profile?.email);
+      if (isBlockedTrialUser(profile) && !currentIsSuperAdmin) {
+        alert('Seu período de teste está bloqueado. Entre em contato com o administrador.');
+        await handleLogout();
+        return;
+      }
       updateUserUI();
       console.log('Usuário já autenticado:', profile?.name);
     }
@@ -62,6 +81,7 @@ function updateUserUI() {
   const userActions = document.getElementById('userActions');
   const userNameEl = document.getElementById('userName');
   const userWhatsappEl = document.getElementById('userWhatsapp');
+  const btnSuperAdmin = document.getElementById('btnSuperAdmin');
   if (!userActions || !userNameEl || !userWhatsappEl) return;
   const displayName = currentProfile?.name || currentUser?.email || 'Usuario';
   const formattedWhatsapp = formatWhatsapp(currentProfile?.whatsapp);
@@ -69,9 +89,15 @@ function updateUserUI() {
     userNameEl.textContent = displayName;
     userWhatsappEl.textContent = formattedWhatsapp;
     userWhatsappEl.style.display = formattedWhatsapp ? 'block' : 'none';
+    if (btnSuperAdmin) {
+      btnSuperAdmin.style.display = currentIsSuperAdmin ? 'inline-flex' : 'none';
+    }
     userActions.style.display = 'flex';
     updateProfilePanel();
   } else {
+    if (btnSuperAdmin) {
+      btnSuperAdmin.style.display = 'none';
+    }
     userActions.style.display = 'none';
   }
 }
@@ -129,6 +155,131 @@ function updateProfilePanel() {
   profileSummary.textContent = `${formatRole(currentProfile?.role)} com acesso ao LM EduKids. Seus dados principais aparecem aqui para consulta rápida.`;
 }
 
+function formatPlanType(planType) {
+  return planType === 'paid' ? 'Pago' : 'Gratuito / Teste';
+}
+
+function setSuperAdminFeedback(message, isError = false) {
+  const feedback = document.getElementById('superAdminFeedback');
+  if (!feedback) return;
+
+  if (!message) {
+    feedback.style.display = 'none';
+    feedback.textContent = '';
+    feedback.classList.remove('error');
+    return;
+  }
+
+  feedback.textContent = message;
+  feedback.style.display = 'block';
+  feedback.classList.toggle('error', isError);
+}
+
+function renderSuperAdminUsers() {
+  const list = document.getElementById('superAdminUserList');
+  if (!list) return;
+
+  if (!adminUsers.length) {
+    list.innerHTML = '<div class="super-admin-empty">Nenhum usuário encontrado.</div>';
+    return;
+  }
+
+  list.innerHTML = adminUsers.map((user) => `
+    <article class="admin-user-card" data-user-id="${user.id}">
+      <div class="admin-user-header">
+        <div>
+          <div class="admin-user-title">${user.name || 'Usuário sem nome'}</div>
+          <div class="admin-user-email">${user.email || '-'}</div>
+        </div>
+        <div class="admin-user-badges">
+          <span class="admin-badge ${user.plan_type === 'paid' ? 'plan-paid' : 'plan-trial'}">${formatPlanType(user.plan_type)}</span>
+          ${user.trial_blocked ? '<span class="admin-badge trial-blocked">Teste bloqueado</span>' : ''}
+          ${isSuperAdminEmail(user.email) ? '<span class="admin-badge">Criador</span>' : ''}
+        </div>
+      </div>
+
+      <div class="admin-user-meta">
+        <div class="admin-meta-item">
+          <span class="admin-meta-label">Perfil</span>
+          <div class="admin-meta-value">${formatRole(user.role)}</div>
+        </div>
+        <div class="admin-meta-item">
+          <span class="admin-meta-label">Ano</span>
+          <div class="admin-meta-value">${formatGrade(user.grade)}</div>
+        </div>
+        <div class="admin-meta-item">
+          <span class="admin-meta-label">Cadastro</span>
+          <div class="admin-meta-value">${formatDate(user.created_at)}</div>
+        </div>
+      </div>
+
+      <div class="admin-user-controls">
+        <div class="admin-field">
+          <label for="plan-${user.id}">Tipo de plano</label>
+          <select id="plan-${user.id}" data-admin-plan>
+            <option value="trial" ${user.plan_type !== 'paid' ? 'selected' : ''}>Gratuito / Teste</option>
+            <option value="paid" ${user.plan_type === 'paid' ? 'selected' : ''}>Pago</option>
+          </select>
+        </div>
+        <label class="admin-checkbox">
+          <input type="checkbox" data-admin-trial-blocked ${user.trial_blocked ? 'checked' : ''}>
+          <span>Bloquear período de teste</span>
+        </label>
+        <button class="admin-save-btn" type="button" data-admin-save>Salvar</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+async function loadSuperAdminUsers(showSuccessMessage = false) {
+  const list = document.getElementById('superAdminUserList');
+  if (list) {
+    list.innerHTML = '<div class="super-admin-empty">Carregando usuários...</div>';
+  }
+
+  const { data, error } = await listAdminUsers();
+  if (error) {
+    setSuperAdminFeedback(error.message || 'Não foi possível carregar os usuários.', true);
+    if (list) {
+      list.innerHTML = '<div class="super-admin-empty">Não foi possível carregar os usuários.</div>';
+    }
+    return;
+  }
+
+  adminUsers = data || [];
+  renderSuperAdminUsers();
+  setSuperAdminFeedback(showSuccessMessage ? 'Lista de usuários atualizada.' : '');
+}
+
+async function saveSuperAdminUserSettings(userId) {
+  const card = document.querySelector(`.admin-user-card[data-user-id="${userId}"]`);
+  if (!card) return;
+
+  const planSelect = card.querySelector('[data-admin-plan]');
+  const trialBlockedInput = card.querySelector('[data-admin-trial-blocked]');
+  const saveButton = card.querySelector('[data-admin-save]');
+  if (!planSelect || !trialBlockedInput || !saveButton) return;
+
+  saveButton.disabled = true;
+  saveButton.textContent = 'Salvando...';
+
+  const { data, error } = await updateUserAdminSettings(userId, {
+    plan_type: planSelect.value,
+    trial_blocked: trialBlockedInput.checked
+  });
+
+  if (error) {
+    setSuperAdminFeedback(error.message || 'Não foi possível salvar esse usuário.', true);
+    saveButton.disabled = false;
+    saveButton.textContent = 'Salvar';
+    return;
+  }
+
+  adminUsers = adminUsers.map((user) => (user.id === userId ? data : user));
+  renderSuperAdminUsers();
+  setSuperAdminFeedback('Configurações do usuário salvas com sucesso.');
+}
+
 function showProfile() {
   updateProfilePanel();
   const overlay = document.getElementById('profileOverlay');
@@ -140,6 +291,19 @@ function hideProfile() {
   if (overlay) overlay.style.display = 'none';
 }
 
+async function showSuperAdmin() {
+  if (!currentIsSuperAdmin) return;
+  const overlay = document.getElementById('superAdminOverlay');
+  if (overlay) overlay.style.display = 'flex';
+  await loadSuperAdminUsers();
+}
+
+function hideSuperAdmin() {
+  const overlay = document.getElementById('superAdminOverlay');
+  if (overlay) overlay.style.display = 'none';
+  setSuperAdminFeedback('');
+}
+
 async function handleLogout() {
   try {
     const { logoutUser } = await import('./supabase.js');
@@ -149,13 +313,17 @@ async function handleLogout() {
   }
   currentUser = null;
   currentProfile = null;
+  currentIsSuperAdmin = false;
   hideProfile();
+  hideSuperAdmin();
   updateUserUI();
   window.location.replace('/');
 }
 
 window.showProfile = showProfile;
 window.hideProfile = hideProfile;
+window.showSuperAdmin = showSuperAdmin;
+window.hideSuperAdmin = hideSuperAdmin;
 window.handleLogout = handleLogout;
 
 // Hook up authenticated actions as soon as the app script loads.
@@ -163,6 +331,11 @@ window.handleLogout = handleLogout;
   const btnProfile = document.getElementById('btnProfile');
   if (btnProfile) {
     btnProfile.addEventListener('click', showProfile);
+  }
+
+  const btnSuperAdmin = document.getElementById('btnSuperAdmin');
+  if (btnSuperAdmin) {
+    btnSuperAdmin.addEventListener('click', showSuperAdmin);
   }
 
   const btnCloseProfile = document.getElementById('btnCloseProfile');
@@ -181,6 +354,11 @@ window.handleLogout = handleLogout;
   if (btnLogout) {
     btnLogout.addEventListener('click', handleLogout);
   }
+
+  const btnRefreshSuperAdmin = document.getElementById('btnRefreshSuperAdmin');
+  if (btnRefreshSuperAdmin) {
+    btnRefreshSuperAdmin.addEventListener('click', () => loadSuperAdminUsers(true));
+  }
 }
 
 document.addEventListener('click', (event) => {
@@ -191,6 +369,13 @@ document.addEventListener('click', (event) => {
   if (profileButton) {
     event.preventDefault();
     showProfile();
+    return;
+  }
+
+  const superAdminButton = target.closest('#btnSuperAdmin');
+  if (superAdminButton) {
+    event.preventDefault();
+    showSuperAdmin();
     return;
   }
 
@@ -208,8 +393,30 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  const saveAdminButton = target.closest('[data-admin-save]');
+  if (saveAdminButton) {
+    event.preventDefault();
+    const card = saveAdminButton.closest('.admin-user-card');
+    if (card?.dataset.userId) {
+      saveSuperAdminUserSettings(card.dataset.userId);
+    }
+    return;
+  }
+
+  const closeSuperAdminButton = target.closest('#btnCloseSuperAdmin');
+  if (closeSuperAdminButton) {
+    event.preventDefault();
+    hideSuperAdmin();
+    return;
+  }
+
   if (target.id === 'profileOverlay') {
     hideProfile();
+    return;
+  }
+
+  if (target.id === 'superAdminOverlay') {
+    hideSuperAdmin();
   }
 });
 

@@ -14,6 +14,8 @@ CREATE TABLE users (
   role VARCHAR(20) NOT NULL CHECK (role IN ('student', 'teacher')), -- 'student' ou 'teacher'
   grade INTEGER,  -- Série (1-9) - apenas para alunos
   whatsapp VARCHAR(20),
+  plan_type VARCHAR(20) NOT NULL DEFAULT 'trial' CHECK (plan_type IN ('trial', 'paid')),
+  trial_blocked BOOLEAN NOT NULL DEFAULT FALSE,
   school VARCHAR(255),
   profile_picture_url TEXT,
   bio TEXT,
@@ -24,6 +26,8 @@ CREATE TABLE users (
 -- Index para melhor performance
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_grade ON users(grade);
+CREATE INDEX idx_users_plan_type ON users(plan_type);
+CREATE INDEX idx_users_trial_blocked ON users(trial_blocked);
 
 -- ============================================================================
 -- 2. TABELA: EXERCISES (Exercícios Resolvidos pelos Alunos)
@@ -170,6 +174,14 @@ CREATE POLICY "Users can insert own data" ON users
 
 CREATE POLICY "Users can update own data" ON users
   FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Super admin can view all users" ON users
+  FOR SELECT USING ((auth.jwt() ->> 'email') = 'juscelinobritob@gmail.com');
+
+CREATE POLICY "Super admin can update all users" ON users
+  FOR UPDATE
+  USING ((auth.jwt() ->> 'email') = 'juscelinobritob@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'juscelinobritob@gmail.com');
 
 -- Policy: Alunos podem ver suas próprias respostas
 CREATE POLICY "Students can view own exercises" ON exercises

@@ -44,6 +44,12 @@ export function getSupabaseConfig() {
   return getConfigFromWindow();
 }
 
+export const SUPER_ADMIN_EMAIL = 'juscelinobritob@gmail.com';
+
+export function isSuperAdminEmail(email) {
+  return (email || '').trim().toLowerCase() === SUPER_ADMIN_EMAIL;
+}
+
 /**
  * Authentication Functions
  */
@@ -452,5 +458,45 @@ export const signUpUserWithTrigger = async (
     return { user, profile, pendingConfirmation: !data.session, error: null };
   } catch (error) {
     return { user: null, profile: null, pendingConfirmation: false, error };
+  }
+};
+
+export const listAdminUsers = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, email, name, role, grade, whatsapp, plan_type, trial_blocked, created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data: data || [], error: null };
+  } catch (error) {
+    return { data: [], error };
+  }
+};
+
+export const updateUserAdminSettings = async (userId, updates) => {
+  try {
+    const payload = {};
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'plan_type')) {
+      payload.plan_type = updates.plan_type;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'trial_blocked')) {
+      payload.trial_blocked = updates.trial_blocked;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(payload)
+      .eq('id', userId)
+      .select('id, email, name, role, grade, whatsapp, plan_type, trial_blocked, created_at')
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error };
   }
 };

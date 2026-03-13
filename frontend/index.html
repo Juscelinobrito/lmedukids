@@ -42,6 +42,7 @@
         <span class="user-name" id="userName"></span>
         <span class="user-whatsapp" id="userWhatsapp"></span>
       </div>
+      <button class="admin-btn" id="btnSuperAdmin" type="button" style="display:none;">Super-admin</button>
       <button class="profile-btn" id="btnProfile" type="button" onclick="window.showProfile?.()">Perfil</button>
       <button class="logout-btn" id="btnLogout" type="button" onclick="window.handleLogout?.()">Sair</button>
     </div>
@@ -433,6 +434,31 @@
     <div class="profile-notes">
       <h3>Resumo do perfil</h3>
       <p id="profileSummary">Seus dados de acesso e contato aparecem aqui.</p>
+    </div>
+  </div>
+</div>
+
+<div class="profile-overlay" id="superAdminOverlay" style="display:none;" onclick="if (event.target === this) window.hideSuperAdmin?.()">
+  <div class="profile-panel super-admin-panel">
+    <button class="profile-close" id="btnCloseSuperAdmin" type="button" aria-label="Fechar super-admin" onclick="window.hideSuperAdmin?.()">×</button>
+    <div class="profile-hero">
+      <div class="profile-avatar">A</div>
+      <div>
+        <h2>Super-admin</h2>
+        <p>Painel de usuários e planos do LM EduKids</p>
+      </div>
+    </div>
+
+    <div class="super-admin-toolbar">
+      <div class="super-admin-note">
+        Acesso exclusivo para `juscelinobritob@gmail.com`
+      </div>
+      <button class="admin-refresh-btn" id="btnRefreshSuperAdmin" type="button">Atualizar lista</button>
+    </div>
+
+    <div class="super-admin-feedback" id="superAdminFeedback" style="display:none;"></div>
+    <div class="super-admin-list" id="superAdminUserList">
+      <div class="super-admin-empty">Carregando usuários...</div>
     </div>
   </div>
 </div>
