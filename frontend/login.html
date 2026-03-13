@@ -24,21 +24,32 @@
     <p id="authFeedback" style="min-height:20px;margin:0 0 12px;text-align:center;font-size:14px;"></p>
 
     <div id="loginForm">
+      <label for="authEmail">Email</label>
       <input id="authEmail" type="email" placeholder="Email">
+      <label for="authPassword">Senha</label>
       <input id="authPassword" type="password" placeholder="Senha">
       <button id="btnAuthAction">Entrar</button>
       <p>Não tem conta? <a href="#" id="linkShowSignup">Registrar</a></p>
     </div>
 
     <div id="signupForm" style="display:none;">
+      <label for="signupName">Nome completo</label>
       <input id="signupName" type="text" placeholder="Nome completo">
+      <label for="signupEmail">Email</label>
       <input id="signupEmail" type="email" placeholder="Email">
+      <label for="signupWhatsapp">Tel. WhatsApp</label>
       <input id="signupWhatsapp" type="tel" placeholder="Tel. WhatsApp" inputmode="tel" autocomplete="tel">
+      <label for="signupPassword">Senha</label>
       <input id="signupPassword" type="password" placeholder="Senha">
+      <label for="signupRole">Perfil</label>
       <select id="signupRole">
         <option value="student">Aluno</option>
         <option value="teacher">Professor</option>
+        <option value="teacher">Pai</option>
+        <option value="teacher">Mãe</option>
+        <option value="teacher">Responsável</option>
       </select>
+      <label for="signupGrade">Série</label>
       <input id="signupGrade" type="number" placeholder="Série (1-9)" min="1" max="9">
       <button id="btnSignupAction">Registrar</button>
       <p>Já tem conta? <a href="#" id="linkShowLogin">Entrar</a></p>
