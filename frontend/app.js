@@ -140,6 +140,20 @@ function hideProfile() {
   if (overlay) overlay.style.display = 'none';
 }
 
+async function handleLogout() {
+  try {
+    const { logoutUser } = await import('./supabase.js');
+    await logoutUser();
+  } catch (err) {
+    console.warn('Erro ao deslogar:', err);
+  }
+  currentUser = null;
+  currentProfile = null;
+  hideProfile();
+  updateUserUI();
+  window.location.replace('/');
+}
+
 // Hook up authenticated actions as soon as the app script loads.
 {
   const btnProfile = document.getElementById('btnProfile');
@@ -161,21 +175,39 @@ function hideProfile() {
 
   const btnLogout = document.getElementById('btnLogout');
   if (btnLogout) {
-    btnLogout.addEventListener('click', async () => {
-      try {
-        const { logoutUser } = await import('./supabase.js');
-        await logoutUser();
-      } catch (err) {
-        console.warn('Erro ao deslogar:', err);
-      }
-      currentUser = null;
-      currentProfile = null;
-      hideProfile();
-      updateUserUI();
-      window.location.replace('/');
-    });
+    btnLogout.addEventListener('click', handleLogout);
   }
 }
+
+document.addEventListener('click', (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+
+  const profileButton = target.closest('#btnProfile');
+  if (profileButton) {
+    event.preventDefault();
+    showProfile();
+    return;
+  }
+
+  const logoutButton = target.closest('#btnLogout');
+  if (logoutButton) {
+    event.preventDefault();
+    handleLogout();
+    return;
+  }
+
+  const closeProfileButton = target.closest('#btnCloseProfile');
+  if (closeProfileButton) {
+    event.preventDefault();
+    hideProfile();
+    return;
+  }
+
+  if (target.id === 'profileOverlay') {
+    hideProfile();
+  }
+});
 
 
 let currentGrade = "1";
