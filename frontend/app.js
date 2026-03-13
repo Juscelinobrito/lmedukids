@@ -140,8 +140,8 @@ function hideProfile() {
   if (overlay) overlay.style.display = 'none';
 }
 
-// hook up authenticated actions after DOM elements exist
-setTimeout(() => {
+// Hook up authenticated actions as soon as the app script loads.
+{
   const btnProfile = document.getElementById('btnProfile');
   if (btnProfile) {
     btnProfile.addEventListener('click', showProfile);
@@ -175,7 +175,7 @@ setTimeout(() => {
       window.location.replace('/');
     });
   }
-}, 500);
+}
 
 
 let currentGrade = "1";
