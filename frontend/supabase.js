@@ -49,28 +49,52 @@ export function getSupabaseConfig() {
  */
 
 // Signup
-export const signUpUser = async (email, password, name, role = 'student', grade = null) => {
+export const signUpUser = async (email, password, name, role = 'student', grade = null, whatsapp = null) => {
   try {
     // 1. Criar user na autenticação
     const { data: { user }, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name,
+          role,
+          grade: role === 'student' ? grade : null,
+          whatsapp,
+        },
+      },
     });
 
     if (signUpError) throw signUpError;
 
     // 2. Criar perfil na tabela users
-    const { data: profile, error: profileError } = await supabase
+    const baseProfile = {
+      id: user.id,
+      email,
+      name,
+      role,
+      grade: role === 'student' ? grade : null,
+    };
+
+    let profileResponse = await supabase
       .from('users')
       .insert([{
-        id: user.id,
-        email,
-        name,
-        role,
-        grade: role === 'student' ? grade : null,
+        ...baseProfile,
+        whatsapp,
       }])
       .select()
       .single();
+
+    // Fallback para bancos ainda sem a coluna whatsapp aplicada.
+    if (profileResponse.error && whatsapp) {
+      profileResponse = await supabase
+        .from('users')
+        .insert([baseProfile])
+        .select()
+        .single();
+    }
+
+    const { data: profile, error: profileError } = profileResponse;
 
     if (profileError) throw profileError;
 
