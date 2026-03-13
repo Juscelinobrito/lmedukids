@@ -502,6 +502,17 @@
     background: #fff;
   }
 
+  .admin-field input {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 14px;
+    border: 1px solid #d0d5dd;
+    font-size: 14px;
+    font-weight: 700;
+    color: #344054;
+    background: #fff;
+  }
+
   .admin-checkbox {
     display: flex;
     align-items: center;
@@ -518,6 +529,20 @@
   .admin-checkbox input {
     width: 18px;
     height: 18px;
+  }
+
+  .profile-edit-form {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #f0e4d6;
+  }
+
+  .profile-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
   }
 
   /* Main container */

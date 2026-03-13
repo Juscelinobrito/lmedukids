@@ -500,3 +500,67 @@ export const updateUserAdminSettings = async (userId, updates) => {
     return { data: null, error };
   }
 };
+
+export const ensureCurrentUserProfile = async (user) => {
+  try {
+    if (!user?.id || !user?.email) {
+      throw new Error('Usuário inválido para sincronizar perfil.');
+    }
+
+    const fallbackName =
+      user.user_metadata?.name ||
+      user.email.split('@')[0] ||
+      'Usuario';
+    const fallbackRole = user.user_metadata?.role || 'teacher';
+    const fallbackGrade = user.user_metadata?.grade || null;
+    const fallbackWhatsapp = user.user_metadata?.whatsapp || null;
+
+    const { data, error } = await supabase
+      .from('users')
+      .upsert({
+        id: user.id,
+        email: user.email,
+        name: fallbackName,
+        role: fallbackRole,
+        grade: fallbackRole === 'student' ? fallbackGrade : null,
+        whatsapp: fallbackWhatsapp,
+      }, { onConflict: 'id' })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error };
+  }
+};
+
+export const updateOwnProfile = async (userId, updates) => {
+  try {
+    const payload = {};
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'name')) {
+      payload.name = updates.name;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'whatsapp')) {
+      payload.whatsapp = updates.whatsapp;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'grade')) {
+      payload.grade = updates.grade;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(payload)
+      .eq('id', userId)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error };
+  }
+};

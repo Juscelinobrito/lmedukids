@@ -435,6 +435,42 @@
       <h3>Resumo do perfil</h3>
       <p id="profileSummary">Seus dados de acesso e contato aparecem aqui.</p>
     </div>
+
+    <div class="profile-edit-actions">
+      <button class="admin-refresh-btn" id="btnEditProfile" type="button">Editar perfil</button>
+    </div>
+
+    <div class="profile-edit-form" id="profileEditForm" style="display:none;">
+      <div class="admin-user-controls">
+        <div class="admin-field">
+          <label for="editProfileName">Nome</label>
+          <input id="editProfileName" type="text" />
+        </div>
+        <div class="admin-field">
+          <label for="editProfileWhatsapp">WhatsApp</label>
+          <input id="editProfileWhatsapp" type="text" />
+        </div>
+        <div class="admin-field">
+          <label for="editProfileGrade">Ano</label>
+          <select id="editProfileGrade">
+            <option value="">Nao informar</option>
+            <option value="1">1º ano</option>
+            <option value="2">2º ano</option>
+            <option value="3">3º ano</option>
+            <option value="4">4º ano</option>
+            <option value="5">5º ano</option>
+            <option value="6">6º ano</option>
+            <option value="7">7º ano</option>
+            <option value="8">8º ano</option>
+            <option value="9">9º ano</option>
+          </select>
+        </div>
+      </div>
+      <div class="profile-edit-actions">
+        <button class="logout-btn" id="btnCancelProfileEdit" type="button">Cancelar</button>
+        <button class="admin-save-btn" id="btnSaveProfileEdit" type="button">Salvar alteracoes</button>
+      </div>
+    </div>
   </div>
 </div>
 

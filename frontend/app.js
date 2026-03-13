@@ -2,8 +2,10 @@ import {
   initSupabase,
   getSupabaseConfig,
   getCurrentUser,
+  ensureCurrentUserProfile,
   isSuperAdminEmail,
   listAdminUsers,
+  updateOwnProfile,
   updateUserAdminSettings
 } from './supabase.js';
 
@@ -24,6 +26,7 @@ let currentUser = null;
 let currentProfile = null;
 let currentIsSuperAdmin = false;
 let adminUsers = [];
+let isEditingProfile = false;
 
 function isBlockedTrialUser(profile) {
   return profile?.plan_type === 'trial' && profile?.trial_blocked;
@@ -62,8 +65,14 @@ async function initAuth() {
     } else {
       currentUser = user;
       currentProfile = profile;
-      currentIsSuperAdmin = isSuperAdminEmail(user.email || profile?.email);
-      if (isBlockedTrialUser(profile) && !currentIsSuperAdmin) {
+      if (!currentProfile) {
+        const ensuredProfile = await ensureCurrentUserProfile(user);
+        if (ensuredProfile.data) {
+          currentProfile = ensuredProfile.data;
+        }
+      }
+      currentIsSuperAdmin = isSuperAdminEmail(user.email || currentProfile?.email);
+      if (isBlockedTrialUser(currentProfile) && !currentIsSuperAdmin) {
         alert('Seu período de teste está bloqueado. Entre em contato com o administrador.');
         await handleLogout();
         return;
@@ -153,6 +162,33 @@ function updateProfilePanel() {
   profileCreatedAt.textContent = formatDate(currentProfile?.created_at);
   profileAvatar.textContent = (currentProfile?.name || currentUser?.email || 'U').trim().charAt(0).toUpperCase();
   profileSummary.textContent = `${formatRole(currentProfile?.role)} com acesso ao LM EduKids. Seus dados principais aparecem aqui para consulta rápida.`;
+  fillProfileEditForm();
+}
+
+function fillProfileEditForm() {
+  const editName = document.getElementById('editProfileName');
+  const editWhatsapp = document.getElementById('editProfileWhatsapp');
+  const editGrade = document.getElementById('editProfileGrade');
+  if (!editName || !editWhatsapp || !editGrade) return;
+
+  editName.value = currentProfile?.name || '';
+  editWhatsapp.value = formatWhatsapp(currentProfile?.whatsapp);
+  editGrade.value = currentProfile?.grade ? String(currentProfile.grade) : '';
+}
+
+function setProfileEditMode(isEditing) {
+  isEditingProfile = isEditing;
+  const form = document.getElementById('profileEditForm');
+  const editButton = document.getElementById('btnEditProfile');
+  if (form) {
+    form.style.display = isEditing ? 'block' : 'none';
+  }
+  if (editButton) {
+    editButton.style.display = isEditing ? 'none' : 'inline-flex';
+  }
+  if (isEditing) {
+    fillProfileEditForm();
+  }
 }
 
 function formatPlanType(planType) {
@@ -289,6 +325,44 @@ function showProfile() {
 function hideProfile() {
   const overlay = document.getElementById('profileOverlay');
   if (overlay) overlay.style.display = 'none';
+  setProfileEditMode(false);
+}
+
+async function saveProfileEdits() {
+  if (!currentUser?.id) return;
+
+  const editName = document.getElementById('editProfileName');
+  const editWhatsapp = document.getElementById('editProfileWhatsapp');
+  const editGrade = document.getElementById('editProfileGrade');
+  const saveButton = document.getElementById('btnSaveProfileEdit');
+  if (!editName || !editWhatsapp || !editGrade || !saveButton) return;
+
+  saveButton.disabled = true;
+  saveButton.textContent = 'Salvando...';
+
+  const whatsappDigits = (editWhatsapp.value || '').replace(/\D/g, '');
+  const payload = {
+    name: editName.value.trim() || currentProfile?.name || currentUser.email,
+    whatsapp: whatsappDigits || null,
+    grade: editGrade.value ? Number(editGrade.value) : null
+  };
+
+  const { data, error } = await updateOwnProfile(currentUser.id, payload);
+
+  saveButton.disabled = false;
+  saveButton.textContent = 'Salvar alteracoes';
+
+  if (error) {
+    alert(error.message || 'Nao foi possivel atualizar o perfil.');
+    return;
+  }
+
+  currentProfile = data;
+  updateUserUI();
+  setProfileEditMode(false);
+  if (currentIsSuperAdmin && document.getElementById('superAdminOverlay')?.style.display === 'flex') {
+    await loadSuperAdminUsers();
+  }
 }
 
 async function showSuperAdmin() {
@@ -358,6 +432,28 @@ window.handleLogout = handleLogout;
   const btnRefreshSuperAdmin = document.getElementById('btnRefreshSuperAdmin');
   if (btnRefreshSuperAdmin) {
     btnRefreshSuperAdmin.addEventListener('click', () => loadSuperAdminUsers(true));
+  }
+
+  const btnEditProfile = document.getElementById('btnEditProfile');
+  if (btnEditProfile) {
+    btnEditProfile.addEventListener('click', () => setProfileEditMode(true));
+  }
+
+  const btnCancelProfileEdit = document.getElementById('btnCancelProfileEdit');
+  if (btnCancelProfileEdit) {
+    btnCancelProfileEdit.addEventListener('click', () => setProfileEditMode(false));
+  }
+
+  const btnSaveProfileEdit = document.getElementById('btnSaveProfileEdit');
+  if (btnSaveProfileEdit) {
+    btnSaveProfileEdit.addEventListener('click', saveProfileEdits);
+  }
+
+  const editProfileWhatsapp = document.getElementById('editProfileWhatsapp');
+  if (editProfileWhatsapp) {
+    editProfileWhatsapp.addEventListener('input', (event) => {
+      event.target.value = formatWhatsapp(event.target.value);
+    });
   }
 }
 
