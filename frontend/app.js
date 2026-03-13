@@ -1,4 +1,4 @@
-import { initSupabase, getSupabaseConfig, getCurrentUser, loginUser, signUpUser, logoutUser } from './supabase.js';
+import { initSupabase, getSupabaseConfig, getCurrentUser } from './supabase.js';
 
 const debug = document.getElementById('debugBanner');
 if (debug) debug.textContent = 'JS: carregado (iniciando autenticação...)';
@@ -50,8 +50,9 @@ async function initAuth() {
     if (debug) debug.textContent = 'JS: consultando sessão atual...';
     const { user, profile } = await getCurrentUser();
     if (!user) {
-      if (debug) debug.textContent = 'JS: sem sessão -> mostra login';
-      showLogin();
+      if (debug) debug.textContent = 'JS: sem sessão -> redirecionando para /login';
+      window.location.replace('/login');
+      return;
     } else {
       currentUser = user;
       currentProfile = profile;
@@ -62,28 +63,14 @@ async function initAuth() {
   } catch (err) {
     console.error('Erro ao inicializar autenticação:', err);
     if (debug) debug.textContent = 'JS: erro no initAuth (veja console)';
-    showLogin();
+    window.location.replace('/login');
   }
-}
-
-
-function showLogin() {
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('authTitle').textContent = 'Entrar';
-  document.getElementById('loginForm').style.display = 'block';
-  document.getElementById('signupForm').style.display = 'none';
-}
-
-function showSignup() {
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('authTitle').textContent = 'Registrar';
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('signupForm').style.display = 'block';
 }
 
 function updateUserUI() {
   const userActions = document.getElementById('userActions');
   const userNameEl = document.getElementById('userName');
+  if (!userActions || !userNameEl) return;
   if (currentProfile?.name) {
     userNameEl.textContent = currentProfile.name;
     userActions.style.display = 'flex';
@@ -92,52 +79,8 @@ function updateUserUI() {
   }
 }
 
-async function handleLogin() {
-  const email = document.getElementById('authEmail').value;
-  const password = document.getElementById('authPassword').value;
-  const { loginUser, getCurrentUser } = await import('./supabase.js');
-  const { user, profile, error } = await loginUser(email, password);
-  if (error) return alert('❌ ' + error.message);
-  currentUser = user;
-  currentProfile = profile;
-  updateUserUI();
-  document.getElementById('authOverlay').style.display = 'none';
-  console.log('Logado como', profile.name);
-}
-
-async function handleSignup() {
-  const name = document.getElementById('signupName').value;
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  const role = document.getElementById('signupRole').value;
-  const grade = document.getElementById('signupGrade').value || null;
-  const { signUpUser } = await import('./supabase.js');
-  const { user, profile, error } = await signUpUser(email, password, name, role, grade);
-  if (error) return alert('❌ ' + error.message);
-  alert('✅ Registrado! Faça login agora.');
-  showLogin();
-}
-
-// attach event listeners
-window.showLogin = showLogin;
-window.showSignup = showSignup;
-window.handleLogin = handleLogin;
-window.handleSignup = handleSignup;
-
-// initialize authentication before anything else
-initAuth();
-
-// hook up modal buttons/links after DOM elements exist
+// hook up authenticated actions after DOM elements exist
 setTimeout(() => {
-  const btnAuth = document.getElementById('btnAuthAction');
-  const btnSignup = document.getElementById('btnSignupAction');
-  const linkToSignup = document.getElementById('linkShowSignup');
-  const linkToLogin = document.getElementById('linkShowLogin');
-  if (btnAuth) btnAuth.addEventListener('click', handleLogin);
-  if (btnSignup) btnSignup.addEventListener('click', handleSignup);
-  if (linkToSignup) linkToSignup.addEventListener('click', e => { e.preventDefault(); showSignup(); });
-  if (linkToLogin) linkToLogin.addEventListener('click', e => { e.preventDefault(); showLogin(); });
-
   const btnLogout = document.getElementById('btnLogout');
   if (btnLogout) {
     btnLogout.addEventListener('click', async () => {
@@ -150,7 +93,7 @@ setTimeout(() => {
       currentUser = null;
       currentProfile = null;
       updateUserUI();
-      showLogin();
+      window.location.replace('/login');
     });
   }
 }, 500);
@@ -1075,4 +1018,3 @@ function hideLoading() {
 }
 
 }); // fim DOMContentLoaded
-

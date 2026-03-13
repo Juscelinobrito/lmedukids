@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LM EduKids | Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-shapes">
+  <div class="shape"></div>
+  <div class="shape"></div>
+  <div class="shape"></div>
+  <div class="shape"></div>
+  <div class="shape"></div>
+</div>
+
+<main class="auth-overlay" style="display:flex;">
+  <section class="auth-box">
+    <h1 style="margin:0 0 8px;font-size:32px;">LM EduKids</h1>
+    <p style="margin:0 0 20px;text-align:center;color:#667085;">Entre para acessar a plataforma.</p>
+    <h2 id="authTitle">Entrar</h2>
+    <p id="authFeedback" style="min-height:20px;margin:0 0 12px;text-align:center;font-size:14px;"></p>
+
+    <div id="loginForm">
+      <input id="authEmail" type="email" placeholder="Email">
+      <input id="authPassword" type="password" placeholder="Senha">
+      <button id="btnAuthAction">Entrar</button>
+      <p>Não tem conta? <a href="#" id="linkShowSignup">Registrar</a></p>
+    </div>
+
+    <div id="signupForm" style="display:none;">
+      <input id="signupName" type="text" placeholder="Nome completo">
+      <input id="signupEmail" type="email" placeholder="Email">
+      <input id="signupPassword" type="password" placeholder="Senha">
+      <select id="signupRole">
+        <option value="student">Aluno</option>
+        <option value="teacher">Professor</option>
+      </select>
+      <input id="signupGrade" type="number" placeholder="Série (1-9)" min="1" max="9">
+      <button id="btnSignupAction">Registrar</button>
+      <p>Já tem conta? <a href="#" id="linkShowLogin">Entrar</a></p>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="login.js"></script>
+</body>
+</html>

@@ -12,6 +12,10 @@
   ],
   "routes": [
     {
+      "src": "/login",
+      "dest": "frontend/login.html"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "backend/server.js"
     },
