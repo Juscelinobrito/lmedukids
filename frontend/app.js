@@ -735,7 +735,7 @@ function savePDF() {
   const tipsHTML        = document.getElementById('tipsContent').innerHTML;
 
   const pdfContent = `
-    <div style="font-family: Arial, sans-serif; color: #1a202c; padding: 10px;">
+    <div style="font-family: Arial, sans-serif; color: #1a202c; padding: 10px; width:100%; max-width:190mm; margin:0 auto; box-sizing:border-box; overflow-wrap:anywhere; word-break:break-word;">
 
       <!-- Cabeçalho -->
       <div style="text-align:center; margin-bottom:28px; padding-bottom:16px; border-bottom:3px solid #667EEA;">
@@ -748,7 +748,7 @@ function savePDF() {
         <div style="background:#667EEA; color:white; padding:10px 16px; border-radius:10px; font-size:15px; font-weight:800; margin-bottom:14px;">
           🌟 Explicação
         </div>
-        <div style="padding:0 8px; font-size:13px; line-height:1.7;">${explanationHTML}</div>
+        <div style="padding:0 8px; font-size:13px; line-height:1.7; overflow-wrap:anywhere; word-break:break-word; white-space:normal;">${explanationHTML}</div>
       </div>
 
       <!-- Exercícios -->
@@ -756,7 +756,7 @@ function savePDF() {
         <div style="background:#F6AD55; color:white; padding:10px 16px; border-radius:10px; font-size:15px; font-weight:800; margin-bottom:14px;">
           ✏️ Exercícios
         </div>
-        <div style="padding:0 8px; font-size:13px; line-height:1.7;">${exercisesHTML}</div>
+        <div style="padding:0 8px; font-size:13px; line-height:1.7; overflow-wrap:anywhere; word-break:break-word; white-space:normal;">${exercisesHTML}</div>
       </div>
 
       <!-- Quiz -->
@@ -764,7 +764,7 @@ function savePDF() {
         <div style="background:#9F7AEA; color:white; padding:10px 16px; border-radius:10px; font-size:15px; font-weight:800; margin-bottom:14px;">
           🎮 Quiz
         </div>
-        <div style="padding:0 8px; font-size:13px; line-height:1.7;">${quizHTML}</div>
+        <div style="padding:0 8px; font-size:13px; line-height:1.7; overflow-wrap:anywhere; word-break:break-word; white-space:normal;">${quizHTML}</div>
       </div>
 
       <!-- Dicas -->
@@ -772,7 +772,7 @@ function savePDF() {
         <div style="background:#F6AD55; color:white; padding:10px 16px; border-radius:10px; font-size:15px; font-weight:800; margin-bottom:14px;">
           💡 Dicas para os Pais
         </div>
-        <div style="padding:0 8px; font-size:13px; line-height:1.7;">${tipsHTML}</div>
+        <div style="padding:0 8px; font-size:13px; line-height:1.7; overflow-wrap:anywhere; word-break:break-word; white-space:normal;">${tipsHTML}</div>
       </div>
 
       <!-- Rodapé -->
@@ -1077,19 +1077,19 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
   const adapt_text = document.getElementById('resultAdaptado').innerHTML;
 
   const pdfContent = `
-    <div style="font-family:Arial,sans-serif;color:#1a202c;padding:16px;">
+    <div style="font-family:Arial,sans-serif;color:#1a202c;padding:16px;width:100%;max-width:190mm;margin:0 auto;box-sizing:border-box;overflow-wrap:anywhere;word-break:break-word;">
       <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #667EEA;">
         <div style="font-size:24px;font-weight:900;color:#667EEA;">LM EduKids — Modo Professor ✨</div>
         <div style="font-size:12px;color:#718096;margin-top:4px;">Adaptação Pedagógica com IA · Sugestão gerada por IA — professor revisa antes de usar</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="display:block;">
         <div>
           <div style="background:#667EEA;color:white;padding:8px 14px;border-radius:8px;font-weight:800;margin-bottom:12px;">📋 Atividade Original</div>
-          <div style="font-size:13px;line-height:1.7;">${orig_text}</div>
+          <div style="font-size:13px;line-height:1.7;overflow-wrap:anywhere;word-break:break-word;white-space:normal;margin-bottom:18px;">${orig_text}</div>
         </div>
         <div>
           <div style="background:#764BA2;color:white;padding:8px 14px;border-radius:8px;font-weight:800;margin-bottom:12px;">✨ Versão Adaptada</div>
-          <div style="font-size:13px;line-height:1.7;">${adapt_text}</div>
+          <div style="font-size:13px;line-height:1.7;overflow-wrap:anywhere;word-break:break-word;white-space:normal;">${adapt_text}</div>
         </div>
       </div>
       <div style="text-align:center;margin-top:24px;font-size:11px;color:#A0AEC0;border-top:1px solid #E2E8F0;padding-top:12px;">
