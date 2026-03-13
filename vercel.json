@@ -12,7 +12,15 @@
   ],
   "routes": [
     {
+      "src": "/app",
+      "dest": "frontend/index.html"
+    },
+    {
       "src": "/login",
+      "dest": "frontend/login.html"
+    },
+    {
+      "src": "/",
       "dest": "frontend/login.html"
     },
     {

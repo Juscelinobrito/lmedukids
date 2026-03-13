@@ -54,7 +54,7 @@ async function handleLogin() {
     return;
   }
 
-  window.location.replace('/');
+  window.location.replace('/app');
 }
 
 async function handleSignup() {
@@ -81,7 +81,7 @@ async function initLoginPage() {
 
     const { user } = await getCurrentUser();
     if (user) {
-      window.location.replace('/');
+      window.location.replace('/app');
       return;
     }
   } catch (error) {

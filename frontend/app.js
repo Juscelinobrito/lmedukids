@@ -50,8 +50,8 @@ async function initAuth() {
     if (debug) debug.textContent = 'JS: consultando sessão atual...';
     const { user, profile } = await getCurrentUser();
     if (!user) {
-      if (debug) debug.textContent = 'JS: sem sessão -> redirecionando para /login';
-      window.location.replace('/login');
+      if (debug) debug.textContent = 'JS: sem sessão -> redirecionando para /';
+      window.location.replace('/');
       return;
     } else {
       currentUser = user;
@@ -63,7 +63,7 @@ async function initAuth() {
   } catch (err) {
     console.error('Erro ao inicializar autenticação:', err);
     if (debug) debug.textContent = 'JS: erro no initAuth (veja console)';
-    window.location.replace('/login');
+    window.location.replace('/');
   }
 }
 
@@ -93,7 +93,7 @@ setTimeout(() => {
       currentUser = null;
       currentProfile = null;
       updateUserUI();
-      window.location.replace('/login');
+      window.location.replace('/');
     });
   }
 }, 500);
