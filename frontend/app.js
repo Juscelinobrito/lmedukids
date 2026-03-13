@@ -63,10 +63,12 @@ function updateUserUI() {
   const userNameEl = document.getElementById('userName');
   const userWhatsappEl = document.getElementById('userWhatsapp');
   if (!userActions || !userNameEl || !userWhatsappEl) return;
-  if (currentProfile?.name) {
-    userNameEl.textContent = currentProfile.name;
-    userWhatsappEl.textContent = formatWhatsapp(currentProfile.whatsapp);
-    userWhatsappEl.style.display = currentProfile.whatsapp ? 'block' : 'none';
+  const displayName = currentProfile?.name || currentUser?.email || 'Usuario';
+  const formattedWhatsapp = formatWhatsapp(currentProfile?.whatsapp);
+  if (currentUser) {
+    userNameEl.textContent = displayName;
+    userWhatsappEl.textContent = formattedWhatsapp;
+    userWhatsappEl.style.display = formattedWhatsapp ? 'block' : 'none';
     userActions.style.display = 'flex';
     updateProfilePanel();
   } else {
@@ -117,7 +119,7 @@ function updateProfilePanel() {
 
   if (!profileName || !profileRole || !profileEmail || !profileWhatsapp || !profileGrade || !profileCreatedAt || !profileAvatar || !profileSummary) return;
 
-  profileName.textContent = currentProfile?.name || 'Usuário';
+  profileName.textContent = currentProfile?.name || currentUser?.email || 'Usuario';
   profileRole.textContent = formatRole(currentProfile?.role);
   profileEmail.textContent = currentProfile?.email || currentUser?.email || 'Não informado';
   profileWhatsapp.textContent = formatWhatsapp(currentProfile?.whatsapp) || 'Não informado';
