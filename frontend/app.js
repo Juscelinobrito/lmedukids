@@ -1369,30 +1369,132 @@ document.getElementById('profNewActivityBtn').addEventListener('click', () => {
 document.getElementById('profPdfBtn').addEventListener('click', () => {
   const btn = document.getElementById('profPdfBtn');
   const orig = btn.innerHTML;
-  btn.innerHTML = '⏳ Gerando...';
+  btn.innerHTML = 'Gerando PDF...';
   btn.disabled = true;
 
   const orig_text = document.getElementById('resultOriginal').innerHTML;
   const adapt_text = document.getElementById('resultAdaptado').innerHTML;
 
   const pdfContent = `
-    <div style="font-family:Arial,sans-serif;color:#1a202c;padding:16px;width:100%;max-width:190mm;margin:0 auto;box-sizing:border-box;overflow-wrap:anywhere;word-break:break-word;">
-      <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #667EEA;">
-        <div style="font-size:24px;font-weight:900;color:#667EEA;">LM EduKids — Modo Professor ✨</div>
-        <div style="font-size:12px;color:#718096;margin-top:4px;">Adaptação Pedagógica com IA · Sugestão gerada por IA — professor revisa antes de usar</div>
-      </div>
-      <div style="display:block;">
-        <div>
-          <div style="background:#667EEA;color:white;padding:8px 14px;border-radius:8px;font-weight:800;margin-bottom:12px;">📋 Atividade Original</div>
-          <div style="font-size:13px;line-height:1.7;overflow-wrap:anywhere;word-break:break-word;white-space:normal;margin-bottom:18px;">${orig_text}</div>
+    <style>
+      .pdf-shell {
+        font-family: Arial, sans-serif;
+        color: #1f2937;
+        width: 100%;
+        max-width: 190mm;
+        margin: 0 auto;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .pdf-shell * { box-sizing: border-box; }
+      .pdf-header {
+        background: linear-gradient(135deg, #fff7ed 0%, #ffffff 58%, #eff6ff 100%);
+        border: 2px solid #e5e7eb;
+        border-radius: 22px;
+        padding: 22px 24px 18px;
+        margin: 0 0 16px;
+      }
+      .pdf-brand-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #1d4ed8;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .pdf-title {
+        margin: 0 0 6px;
+        font-size: 26px;
+        font-weight: 900;
+        color: #1d4ed8;
+      }
+      .pdf-subtitle {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #475467;
+      }
+      .pdf-disclaimer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .pdf-chip {
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.88);
+        border: 1px solid #e5e7eb;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #344054;
+      }
+      .pdf-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        padding: 18px;
+        margin-bottom: 14px;
+        background: #ffffff;
+        page-break-inside: avoid;
+      }
+      .pdf-card.original { border-top: 6px solid #2563eb; }
+      .pdf-card.adapted { border-top: 6px solid #7c3aed; }
+      .pdf-section-title {
+        margin: 0 0 12px;
+        font-size: 18px;
+        font-weight: 800;
+        color: #111827;
+      }
+      .pdf-body {
+        font-size: 13px;
+        line-height: 1.65;
+        color: #1f2937;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-body * {
+        max-width: 100% !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+      }
+      .pdf-body p, .pdf-body div, .pdf-body li { margin-bottom: 8px; }
+      .pdf-footer {
+        margin-top: 18px;
+        text-align: center;
+        font-size: 11px;
+        color: #667085;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 12px;
+      }
+    </style>
+    <div class="pdf-shell">
+      <div class="pdf-header">
+        <div class="pdf-brand-badge">LM EduKids</div>
+        <h1 class="pdf-title">Adaptacao Pedagogica</h1>
+        <p class="pdf-subtitle">Documento com cabecalho reforcado e distribuicao de espaco pensada para aproveitar melhor a pagina desde o topo.</p>
+        <div class="pdf-disclaimer">
+          <div class="pdf-chip"><strong>Modo Professor</strong><br>Versao pronta para leitura, arquivo e compartilhamento.</div>
+          <div class="pdf-chip"><strong>Revisao final</strong><br>Revise o conteudo antes de aplicar com a turma.</div>
         </div>
-        <div>
-          <div style="background:#764BA2;color:white;padding:8px 14px;border-radius:8px;font-weight:800;margin-bottom:12px;">✨ Versão Adaptada</div>
-          <div style="font-size:13px;line-height:1.7;overflow-wrap:anywhere;word-break:break-word;white-space:normal;">${adapt_text}</div>
-        </div>
       </div>
-      <div style="text-align:center;margin-top:24px;font-size:11px;color:#A0AEC0;border-top:1px solid #E2E8F0;padding-top:12px;">
-        LM EduKids Modo Professor • Adaptação gerada por IA • Revise antes de usar com alunos
+
+      <section class="pdf-card original">
+        <h2 class="pdf-section-title">Atividade original</h2>
+        <div class="pdf-body">${orig_text}</div>
+      </section>
+
+      <section class="pdf-card adapted">
+        <h2 class="pdf-section-title">Versao adaptada</h2>
+        <div class="pdf-body">${adapt_text}</div>
+      </section>
+
+      <div class="pdf-footer">
+        LM EduKids • Documento de apoio ao professor • Gerado em ${new Date().toLocaleDateString('pt-BR')}
       </div>
     </div>`;
 
@@ -1401,17 +1503,20 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
   document.body.appendChild(el);
 
   html2pdf().set({
-    margin: [10,10,10,10],
+    margin: [6, 6, 8, 6],
     filename: 'LMEduKids-Adaptacao.pdf',
     image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
   }).from(el).save().then(() => {
     document.body.removeChild(el);
-    btn.innerHTML = orig; btn.disabled = false;
+    btn.innerHTML = orig;
+    btn.disabled = false;
   }).catch(() => {
     document.body.removeChild(el);
-    btn.innerHTML = orig; btn.disabled = false;
+    btn.innerHTML = orig;
+    btn.disabled = false;
     alert('Erro ao gerar PDF.');
   });
 });
