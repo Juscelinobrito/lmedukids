@@ -1500,28 +1500,28 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
     </div>`;
 
   const el = document.createElement('div');
-  el.style.position = 'absolute';
-  el.style.left = '-99999px';
-  el.style.top = '0';
-  el.style.width = '210mm';
-  el.style.padding = '0';
+  el.style.position = 'fixed';
+  el.style.inset = '0';
+  el.style.padding = '12mm 6mm 8mm';
   el.style.margin = '0';
   el.style.background = '#ffffff';
-  el.style.opacity = '1';
-  el.style.visibility = 'visible';
+  el.style.overflow = 'auto';
+  el.style.zIndex = '2147483647';
   el.style.pointerEvents = 'none';
   el.innerHTML = pdfContent;
   document.body.appendChild(el);
 
-  requestAnimationFrame(() => {
+  const pdfShell = el.querySelector('.pdf-shell');
+
+  setTimeout(() => {
     html2pdf().set({
-      margin: [6, 6, 8, 6],
+      margin: [0, 0, 0, 0],
       filename: 'LMEduKids-Adaptacao.pdf',
       image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'legacy'] }
-    }).from(el).save().then(() => {
+    }).from(pdfShell).save().then(() => {
       document.body.removeChild(el);
       btn.innerHTML = orig;
       btn.disabled = false;
@@ -1531,7 +1531,7 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
       btn.disabled = false;
       alert('Erro ao gerar PDF.');
     });
-  });
+  }, 80);
 });
 
 // ── Helpers de loading ───────────────────────────────────────────
