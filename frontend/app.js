@@ -1380,11 +1380,12 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
       .pdf-shell {
         font-family: Arial, sans-serif;
         color: #1f2937;
-        width: 100%;
-        max-width: 190mm;
-        margin: 0 auto;
+        width: 198mm;
+        max-width: 198mm;
+        margin: 0;
         padding: 0;
         box-sizing: border-box;
+        background: #ffffff;
       }
       .pdf-shell * { box-sizing: border-box; }
       .pdf-header {
@@ -1499,8 +1500,18 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
     </div>`;
 
   const el = document.createElement('div');
+  el.style.position = 'fixed';
+  el.style.left = '0';
+  el.style.top = '0';
+  el.style.width = '210mm';
+  el.style.padding = '0';
+  el.style.margin = '0';
+  el.style.background = '#ffffff';
+  el.style.opacity = '0.01';
+  el.style.pointerEvents = 'none';
+  el.style.zIndex = '-1';
   el.innerHTML = pdfContent;
-  document.body.appendChild(el);
+  document.body.prepend(el);
 
   html2pdf().set({
     margin: [6, 6, 8, 6],
