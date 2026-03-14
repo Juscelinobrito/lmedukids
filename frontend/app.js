@@ -89,15 +89,11 @@ async function initAuth() {
 function updateUserUI() {
   const userActions = document.getElementById('userActions');
   const userNameEl = document.getElementById('userName');
-  const userWhatsappEl = document.getElementById('userWhatsapp');
   const btnSuperAdmin = document.getElementById('btnSuperAdmin');
-  if (!userActions || !userNameEl || !userWhatsappEl) return;
+  if (!userActions || !userNameEl) return;
   const displayName = currentProfile?.name || currentUser?.email || 'Usuario';
-  const formattedWhatsapp = formatWhatsapp(currentProfile?.whatsapp);
   if (currentUser) {
     userNameEl.textContent = displayName;
-    userWhatsappEl.textContent = formattedWhatsapp;
-    userWhatsappEl.style.display = formattedWhatsapp ? 'block' : 'none';
     if (btnSuperAdmin) {
       btnSuperAdmin.style.display = currentIsSuperAdmin ? 'inline-flex' : 'none';
     }
