@@ -396,6 +396,88 @@ window.showSuperAdmin = showSuperAdmin;
 window.hideSuperAdmin = hideSuperAdmin;
 window.handleLogout = handleLogout;
 
+function triggerStudentUpload(targetId) {
+  const input = document.getElementById(targetId);
+  if (!input) return;
+  input.value = '';
+  input.click();
+}
+
+function resetStudentTaskUI() {
+  const results = document.getElementById('results');
+  const uploadCard = document.getElementById('uploadCard');
+  const preview = document.getElementById('previewContainer');
+  const uploadZoneEl = document.getElementById('uploadZone');
+  const btnText = document.getElementById('btnText');
+  const btnIcon = document.getElementById('btnIcon');
+  const analyzeButton = document.getElementById('analyzeBtn');
+  const quizScore = document.getElementById('quizScore');
+  const starsReward = document.getElementById('starsReward');
+  const inputCamera = document.getElementById('fileInputCamera');
+  const inputGallery = document.getElementById('fileInputGallery');
+
+  if (results) results.style.display = 'none';
+  if (uploadCard) uploadCard.style.display = 'block';
+  if (preview) preview.style.display = 'none';
+  if (uploadZoneEl) uploadZoneEl.style.display = 'block';
+  if (inputCamera) inputCamera.value = '';
+  if (inputGallery) inputGallery.value = '';
+  if (btnText) btnText.textContent = 'Envie uma foto primeiro';
+  if (btnIcon) btnIcon.textContent = '🔍';
+  if (analyzeButton) analyzeButton.disabled = true;
+  if (quizScore) quizScore.style.display = 'none';
+  if (starsReward) starsReward.style.display = 'none';
+
+  uploadedImageBase64 = null;
+  uploadedImageType = null;
+  quizAnswers = {};
+  quizCorrect = 0;
+  quizTotal = 0;
+
+  document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+  document.querySelector('[data-tab="explanation"]')?.classList.add('active');
+  document.getElementById('tab-explanation')?.classList.add('active');
+}
+
+function triggerProfessorUpload(targetId) {
+  const input = document.getElementById(targetId);
+  if (!input) return;
+  input.value = '';
+  input.click();
+}
+
+function resetProfessorTaskUI() {
+  const preview = document.getElementById('profPreviewContainer');
+  const uploadZoneEl = document.getElementById('profUploadZone');
+  const btnText = document.getElementById('profBtnText');
+  const analyzeButton = document.getElementById('profAnalyzeBtn');
+  const inputCamera = document.getElementById('profInputCamera');
+  const inputGallery = document.getElementById('profInputGallery');
+
+  profImageBase64 = null;
+  profImageType = null;
+  profAnalysisData = null;
+  profAdaptResult = null;
+
+  if (preview) preview.style.display = 'none';
+  if (uploadZoneEl) uploadZoneEl.style.display = 'block';
+  if (btnText) btnText.textContent = 'Envie uma foto primeiro';
+  if (analyzeButton) analyzeButton.disabled = true;
+  if (inputCamera) inputCamera.value = '';
+  if (inputGallery) inputGallery.value = '';
+
+  document.querySelectorAll('.adapt-btn').forEach((b) => b.classList.remove('selected'));
+  showProfTela(1);
+}
+
+function switchMainMode(mode) {
+  document.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
+  document.querySelector(`.mode-btn[data-mode="${mode}"]`)?.classList.add('active');
+  document.getElementById('modoAluno').style.display = mode === 'aluno' ? '' : 'none';
+  document.getElementById('modoProfessor').style.display = mode === 'professor' ? '' : 'none';
+}
+
 // Hook up authenticated actions as soon as the app script loads.
 {
   const btnProfile = document.getElementById('btnProfile');
@@ -456,6 +538,98 @@ window.handleLogout = handleLogout;
 document.addEventListener('click', (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
+
+  const modeButton = target.closest('.mode-btn');
+  if (modeButton?.dataset.mode) {
+    event.preventDefault();
+    switchMainMode(modeButton.dataset.mode);
+    return;
+  }
+
+  if (target.closest('#cameraBtn')) {
+    event.preventDefault();
+    triggerStudentUpload('fileInputCamera');
+    return;
+  }
+
+  if (target.closest('#galleryBtn')) {
+    event.preventDefault();
+    triggerStudentUpload('fileInputGallery');
+    return;
+  }
+
+  if (target.closest('#removeBtn')) {
+    event.preventDefault();
+    resetStudentTaskUI();
+    return;
+  }
+
+  if (target.closest('#analyzeBtn')) {
+    event.preventDefault();
+    analyzeTask();
+    return;
+  }
+
+  if (target.closest('#newTaskBtn')) {
+    event.preventDefault();
+    resetStudentTaskUI();
+    return;
+  }
+
+  if (target.closest('#savePdfBtn')) {
+    event.preventDefault();
+    savePDF();
+    return;
+  }
+
+  if (target.closest('#profCameraBtn')) {
+    event.preventDefault();
+    triggerProfessorUpload('profInputCamera');
+    return;
+  }
+
+  if (target.closest('#profGalleryBtn')) {
+    event.preventDefault();
+    triggerProfessorUpload('profInputGallery');
+    return;
+  }
+
+  if (target.closest('#profRemoveBtn')) {
+    event.preventDefault();
+    resetProfessorTaskUI();
+    return;
+  }
+
+  if (target.closest('#profBackBtn1')) {
+    event.preventDefault();
+    showProfTela(1);
+    return;
+  }
+
+  if (target.closest('#profBackBtn2')) {
+    event.preventDefault();
+    showProfTela(2);
+    return;
+  }
+
+  if (target.closest('#profNextBtn2')) {
+    event.preventDefault();
+    showProfTela(3);
+    return;
+  }
+
+  if (target.closest('#profNewAdaptBtn')) {
+    event.preventDefault();
+    document.querySelectorAll('.adapt-btn').forEach((b) => b.classList.remove('selected'));
+    showProfTela(3);
+    return;
+  }
+
+  if (target.closest('#profNewActivityBtn')) {
+    event.preventDefault();
+    resetProfessorTaskUI();
+    return;
+  }
 
   const profileButton = target.closest('#btnProfile');
   if (profileButton) {
