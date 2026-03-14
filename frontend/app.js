@@ -1723,7 +1723,7 @@ function hideLoading() {
   overlay.classList.remove('active');
 }
 
-function normalizeStudentAnalysis(data = {}) {
+function normalizeStudentAnalysisSafe(data = {}) {
   const explicacao = data.explicacao && typeof data.explicacao === 'object' ? data.explicacao : {};
 
   return {
@@ -1753,7 +1753,7 @@ function normalizeStudentAnalysis(data = {}) {
   };
 }
 
-function renderResults(data) {
+function renderResultsSafe(data) {
   const normalized = normalizeStudentAnalysis(data);
 
   document.getElementById('uploadCard').style.display = 'none';
@@ -1772,7 +1772,7 @@ function renderResults(data) {
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderExplanation(exp, topico) {
+function renderExplanationSafe(exp, topico) {
   const conceitos = Array.isArray(exp?.conceitos) ? exp.conceitos : [];
   const html = `
     <h3>Assunto: ${topico || 'Conteudo da atividade'}</h3>
@@ -1791,7 +1791,7 @@ function renderExplanation(exp, topico) {
   document.getElementById('explanationContent').innerHTML = html;
 }
 
-function renderExercises(exercises) {
+function renderExercisesSafe(exercises) {
   const safeExercises = Array.isArray(exercises) ? exercises : [];
   const html = safeExercises.map((ex, i) => {
     exerciseAnswers[i] = ex.resposta;
@@ -1863,7 +1863,7 @@ function renderExercises(exercises) {
   }
 }
 
-function renderQuiz(quizData) {
+function renderQuizSafe(quizData) {
   const safeQuiz = Array.isArray(quizData) ? quizData : [];
   quizTotal = safeQuiz.length;
   quizCorrect = 0;
@@ -1932,7 +1932,7 @@ function renderQuiz(quizData) {
   }
 }
 
-function renderTips(tips) {
+function renderTipsSafe(tips) {
   const safeTips = Array.isArray(tips) ? tips : [];
   const html = safeTips.map(tip => `
     <div class="tip-item">
@@ -1947,7 +1947,7 @@ function renderTips(tips) {
   document.getElementById('tipsContent').innerHTML = html;
 }
 
-function savePDF() {
+function savePDFSafe() {
   const btn = document.getElementById('savePdfBtn');
   const originalText = btn.innerHTML;
   btn.innerHTML = 'Gerando PDF...';
