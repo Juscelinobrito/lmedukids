@@ -8,6 +8,8 @@ import {
   signUpUserWithTrigger,
 } from './supabase.js';
 
+const SAVED_EMAIL_KEY = 'lmedukids:last-email';
+
 async function loadSupabaseConfig() {
   const windowConfig = getSupabaseConfig();
   let config = {
@@ -52,6 +54,25 @@ function setFeedback(message, isError = false) {
   feedback.style.color = isError ? '#b42318' : '#0f766e';
 }
 
+function saveLastEmail(email) {
+  const normalized = (email || '').trim();
+  if (!normalized) return;
+  localStorage.setItem(SAVED_EMAIL_KEY, normalized);
+}
+
+function loadLastEmail() {
+  return localStorage.getItem(SAVED_EMAIL_KEY) || '';
+}
+
+function syncEmailFields(email) {
+  const normalized = (email || '').trim();
+  const authEmail = document.getElementById('authEmail');
+  const signupEmail = document.getElementById('signupEmail');
+
+  if (authEmail && !authEmail.value) authEmail.value = normalized;
+  if (signupEmail && !signupEmail.value) signupEmail.value = normalized;
+}
+
 function normalizeWhatsapp(value) {
   const digits = (value || '').replace(/\D/g, '');
   return digits || null;
@@ -74,6 +95,7 @@ function isValidWhatsapp(value) {
 async function handleLogin() {
   const email = document.getElementById('authEmail').value;
   const password = document.getElementById('authPassword').value;
+  saveLastEmail(email);
   const { profile, error } = await loginUser(email, password);
 
   if (error) {
@@ -98,6 +120,7 @@ async function handleSignup() {
   const password = document.getElementById('signupPassword').value;
   const role = document.getElementById('signupRole').value;
   const grade = document.getElementById('signupGrade').value || null;
+  saveLastEmail(email);
 
   if (whatsapp && !isValidWhatsapp(whatsapp)) {
     setFeedback('Informe um WhatsApp valido com DDD.', true);
@@ -120,6 +143,8 @@ async function handleSignup() {
   }
 
   showLogin();
+  document.getElementById('authEmail').value = email;
+  document.getElementById('authPassword').value = '';
   setFeedback(
     pendingConfirmation
       ? 'Cadastro realizado. Verifique seu email para confirmar a conta antes de entrar.'
@@ -128,6 +153,36 @@ async function handleSignup() {
 }
 
 async function initLoginPage() {
+  syncEmailFields(loadLastEmail());
+
+  document.getElementById('loginForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    await handleLogin();
+  });
+  document.getElementById('signupForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    await handleSignup();
+  });
+  document.getElementById('signupWhatsapp').addEventListener('input', (event) => {
+    event.target.value = formatWhatsapp(event.target.value);
+  });
+  document.getElementById('authEmail').addEventListener('input', (event) => {
+    saveLastEmail(event.target.value);
+  });
+  document.getElementById('signupEmail').addEventListener('input', (event) => {
+    saveLastEmail(event.target.value);
+  });
+  document.getElementById('linkShowSignup').addEventListener('click', (event) => {
+    event.preventDefault();
+    showSignup();
+    syncEmailFields(loadLastEmail());
+  });
+  document.getElementById('linkShowLogin').addEventListener('click', (event) => {
+    event.preventDefault();
+    showLogin();
+    syncEmailFields(loadLastEmail());
+  });
+
   try {
     const config = await loadSupabaseConfig();
     initSupabase(config);
@@ -141,20 +196,6 @@ async function initLoginPage() {
     console.error('Erro ao inicializar login:', error);
     setFeedback('Nao foi possivel carregar a autenticacao.', true);
   }
-
-  document.getElementById('btnAuthAction').addEventListener('click', handleLogin);
-  document.getElementById('btnSignupAction').addEventListener('click', handleSignup);
-  document.getElementById('signupWhatsapp').addEventListener('input', (event) => {
-    event.target.value = formatWhatsapp(event.target.value);
-  });
-  document.getElementById('linkShowSignup').addEventListener('click', (event) => {
-    event.preventDefault();
-    showSignup();
-  });
-  document.getElementById('linkShowLogin').addEventListener('click', (event) => {
-    event.preventDefault();
-    showLogin();
-  });
 
   showLogin();
 }

@@ -396,6 +396,88 @@ window.showSuperAdmin = showSuperAdmin;
 window.hideSuperAdmin = hideSuperAdmin;
 window.handleLogout = handleLogout;
 
+function triggerStudentUpload(targetId) {
+  const input = document.getElementById(targetId);
+  if (!input) return;
+  input.value = '';
+  input.click();
+}
+
+function resetStudentTaskUI() {
+  const results = document.getElementById('results');
+  const uploadCard = document.getElementById('uploadCard');
+  const preview = document.getElementById('previewContainer');
+  const uploadZoneEl = document.getElementById('uploadZone');
+  const btnText = document.getElementById('btnText');
+  const btnIcon = document.getElementById('btnIcon');
+  const analyzeButton = document.getElementById('analyzeBtn');
+  const quizScore = document.getElementById('quizScore');
+  const starsReward = document.getElementById('starsReward');
+  const inputCamera = document.getElementById('fileInputCamera');
+  const inputGallery = document.getElementById('fileInputGallery');
+
+  if (results) results.style.display = 'none';
+  if (uploadCard) uploadCard.style.display = 'block';
+  if (preview) preview.style.display = 'none';
+  if (uploadZoneEl) uploadZoneEl.style.display = 'block';
+  if (inputCamera) inputCamera.value = '';
+  if (inputGallery) inputGallery.value = '';
+  if (btnText) btnText.textContent = 'Envie uma foto primeiro';
+  if (btnIcon) btnIcon.textContent = '🔍';
+  if (analyzeButton) analyzeButton.disabled = true;
+  if (quizScore) quizScore.style.display = 'none';
+  if (starsReward) starsReward.style.display = 'none';
+
+  uploadedImageBase64 = null;
+  uploadedImageType = null;
+  quizAnswers = {};
+  quizCorrect = 0;
+  quizTotal = 0;
+
+  document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
+  document.querySelector('[data-tab="explanation"]')?.classList.add('active');
+  document.getElementById('tab-explanation')?.classList.add('active');
+}
+
+function triggerProfessorUpload(targetId) {
+  const input = document.getElementById(targetId);
+  if (!input) return;
+  input.value = '';
+  input.click();
+}
+
+function resetProfessorTaskUI() {
+  const preview = document.getElementById('profPreviewContainer');
+  const uploadZoneEl = document.getElementById('profUploadZone');
+  const btnText = document.getElementById('profBtnText');
+  const analyzeButton = document.getElementById('profAnalyzeBtn');
+  const inputCamera = document.getElementById('profInputCamera');
+  const inputGallery = document.getElementById('profInputGallery');
+
+  profImageBase64 = null;
+  profImageType = null;
+  profAnalysisData = null;
+  profAdaptResult = null;
+
+  if (preview) preview.style.display = 'none';
+  if (uploadZoneEl) uploadZoneEl.style.display = 'block';
+  if (btnText) btnText.textContent = 'Envie uma foto primeiro';
+  if (analyzeButton) analyzeButton.disabled = true;
+  if (inputCamera) inputCamera.value = '';
+  if (inputGallery) inputGallery.value = '';
+
+  document.querySelectorAll('.adapt-btn').forEach((b) => b.classList.remove('selected'));
+  showProfTela(1);
+}
+
+function switchMainMode(mode) {
+  document.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
+  document.querySelector(`.mode-btn[data-mode="${mode}"]`)?.classList.add('active');
+  document.getElementById('modoAluno').style.display = mode === 'aluno' ? '' : 'none';
+  document.getElementById('modoProfessor').style.display = mode === 'professor' ? '' : 'none';
+}
+
 // Hook up authenticated actions as soon as the app script loads.
 {
   const btnProfile = document.getElementById('btnProfile');
@@ -1380,11 +1462,12 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
       .pdf-shell {
         font-family: Arial, sans-serif;
         color: #1f2937;
-        width: 100%;
-        max-width: 190mm;
-        margin: 0 auto;
+        width: 198mm;
+        max-width: 198mm;
+        margin: 0;
         padding: 0;
         box-sizing: border-box;
+        background: #ffffff;
       }
       .pdf-shell * { box-sizing: border-box; }
       .pdf-header {
@@ -1499,26 +1582,38 @@ document.getElementById('profPdfBtn').addEventListener('click', () => {
     </div>`;
 
   const el = document.createElement('div');
+  el.style.position = 'fixed';
+  el.style.inset = '0';
+  el.style.padding = '12mm 6mm 8mm';
+  el.style.margin = '0';
+  el.style.background = '#ffffff';
+  el.style.overflow = 'auto';
+  el.style.zIndex = '2147483647';
+  el.style.pointerEvents = 'none';
   el.innerHTML = pdfContent;
   document.body.appendChild(el);
 
-  html2pdf().set({
-    margin: [6, 6, 8, 6],
-    filename: 'LMEduKids-Adaptacao.pdf',
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] }
-  }).from(el).save().then(() => {
-    document.body.removeChild(el);
-    btn.innerHTML = orig;
-    btn.disabled = false;
-  }).catch(() => {
-    document.body.removeChild(el);
-    btn.innerHTML = orig;
-    btn.disabled = false;
-    alert('Erro ao gerar PDF.');
-  });
+  const pdfShell = el.querySelector('.pdf-shell');
+
+  setTimeout(() => {
+    html2pdf().set({
+      margin: [0, 0, 0, 0],
+      filename: 'LMEduKids-Adaptacao.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    }).from(pdfShell).save().then(() => {
+      document.body.removeChild(el);
+      btn.innerHTML = orig;
+      btn.disabled = false;
+    }).catch(() => {
+      document.body.removeChild(el);
+      btn.innerHTML = orig;
+      btn.disabled = false;
+      alert('Erro ao gerar PDF.');
+    });
+  }, 80);
 });
 
 // ── Helpers de loading ───────────────────────────────────────────
@@ -1535,3 +1630,307 @@ function hideLoading() {
   clearInterval(overlay._interval);
   overlay.classList.remove('active');
 }
+
+function normalizeStudentAnalysisSafe(data = {}) {
+  const explicacao = data.explicacao && typeof data.explicacao === 'object' ? data.explicacao : {};
+
+  return {
+    topico: data.topico || 'Conteudo da atividade',
+    explicacao: {
+      intro: explicacao.intro || 'A analise foi gerada com sucesso, mas alguns blocos vieram incompletos.',
+      conceitos: Array.isArray(explicacao.conceitos) ? explicacao.conceitos : [],
+      exemplo: explicacao.exemplo || 'Use a atividade original como apoio para relacionar o assunto ao dia a dia.',
+      curiosidade: explicacao.curiosidade || 'Revise o conteudo da tarefa para complementar a explicacao.'
+    },
+    exercicios: (Array.isArray(data.exercicios) ? data.exercicios : []).map((ex, i) => ({
+      pergunta: ex?.pergunta || `Exercicio ${i + 1}`,
+      dica: ex?.dica || 'Leia novamente o enunciado e tente resolver com calma.',
+      resposta: ex?.resposta || 'Resposta nao informada.'
+    })),
+    quiz: (Array.isArray(data.quiz) ? data.quiz : []).map((q, i) => ({
+      pergunta: q?.pergunta || `Pergunta ${i + 1}`,
+      opcoes: Array.isArray(q?.opcoes) && q.opcoes.length ? q.opcoes : ['Opcao A', 'Opcao B', 'Opcao C', 'Opcao D'],
+      correta: Number.isInteger(q?.correta) ? q.correta : 0,
+      explicacao: q?.explicacao || 'Explicacao nao informada.'
+    })),
+    dicas_pais: (Array.isArray(data.dicas_pais) ? data.dicas_pais : []).map((tip, i) => ({
+      emoji: tip?.emoji || '💡',
+      titulo: tip?.titulo || `Dica ${i + 1}`,
+      texto: tip?.texto || 'Acompanhe a atividade e incentive a crianca a explicar o raciocinio.'
+    }))
+  };
+}
+
+function renderResultsSafe(data) {
+  const normalized = normalizeStudentAnalysisSafe(data);
+
+  document.getElementById('uploadCard').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  saveAnalysisData(normalized);
+  renderExplanation(normalized.explicacao, normalized.topico);
+  renderExercises(normalized.exercicios);
+  renderQuiz(normalized.quiz);
+  renderTips(normalized.dicas_pais);
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector('[data-tab="explanation"]').classList.add('active');
+  document.getElementById('tab-explanation').classList.add('active');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderExplanationSafe(exp, topico) {
+  const conceitos = Array.isArray(exp?.conceitos) ? exp.conceitos : [];
+  const html = `
+    <h3>Assunto: ${topico || 'Conteudo da atividade'}</h3>
+    <p>${exp?.intro || ''}</p>
+    ${conceitos.map(c => `
+      <div style="background:#F8FBFF;border-radius:14px;padding:14px 16px;margin:12px 0;border-left:4px solid var(--sky);">
+        <strong>${c?.emoji || '📘'} ${c?.titulo || 'Conceito'}</strong>
+        <p style="margin-top:6px;margin-bottom:0;">${c?.descricao || ''}</p>
+      </div>
+    `).join('')}
+    <h3>Exemplo do dia a dia</h3>
+    <p>${exp?.exemplo || ''}</p>
+    <h3>Voce sabia?</h3>
+    <p>${exp?.curiosidade || ''}</p>
+  `;
+  document.getElementById('explanationContent').innerHTML = html;
+}
+
+function renderExercisesSafe(exercises) {
+  const safeExercises = Array.isArray(exercises) ? exercises : [];
+  const html = safeExercises.map((ex, i) => {
+    exerciseAnswers[i] = ex.resposta;
+    return `
+    <div class="exercise-item" id="exercise-${i}">
+      <div class="exercise-number">${i + 1}</div>
+      <div class="exercise-question">${ex.pergunta}</div>
+      <div style="font-size:13px;color:#8899AA;margin-bottom:10px;font-weight:600;">Dica: ${ex.dica}</div>
+      <textarea class="exercise-answer-area" id="answer-${i}" placeholder="Digite sua resposta aqui..." rows="2"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+        <button class="check-btn" data-action="check" data-idx="${i}">
+          Verificar resposta
+        </button>
+        <button data-action="reveal" data-idx="${i}" style="padding:10px 16px;background:white;border:2px solid #E0E8F0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:#8899AA;cursor:pointer;transition:all 0.2s;">
+          Ver resposta
+        </button>
+      </div>
+      <div class="feedback-box" id="feedback-${i}"></div>
+    </div>`;
+  }).join('') || '<div class="exercise-item"><div class="exercise-question">Nenhum exercicio foi retornado pela IA nesta analise.</div></div>';
+
+  const container = document.getElementById('exercisesContent');
+  container.innerHTML = html;
+
+  if (!container.dataset.boundExercises) {
+    container.addEventListener('click', function(e) {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const idx = parseInt(btn.dataset.idx, 10);
+      const correctAnswer = String(exerciseAnswers[idx] || '').trim();
+
+      if (action === 'check') {
+        const userAnswer = document.getElementById(`answer-${idx}`).value.trim().toLowerCase();
+        const correct = correctAnswer.toLowerCase();
+        const feedback = document.getElementById(`feedback-${idx}`);
+
+        if (!userAnswer) {
+          alert('Escreva sua resposta antes de verificar!');
+          return;
+        }
+
+        const normalize = (s) => s.replace(/[^a-zA-Z0-9À-ÿ]/g, '').toLowerCase();
+        const nu = normalize(userAnswer);
+        const nc = normalize(correct);
+        const isCorrect = nu === nc || nc.includes(nu) || nu.includes(nc) || (nc.length > 0 && nu.length > 0 && nc.startsWith(nu.slice(0, 4)));
+
+        if (isCorrect) {
+          feedback.className = 'feedback-box correct';
+          feedback.innerHTML = 'Muito bem! Voce acertou!';
+          feedback.style.display = 'flex';
+          addStar();
+        } else {
+          feedback.className = 'feedback-box incorrect';
+          feedback.innerHTML = `Quase la! A resposta correta e: <strong style="margin-left:6px">${correctAnswer || 'Nao informada'}</strong>`;
+          feedback.style.display = 'flex';
+        }
+      }
+
+      if (action === 'reveal') {
+        const feedback = document.getElementById(`feedback-${idx}`);
+        feedback.className = 'feedback-box incorrect';
+        feedback.innerHTML = `Resposta: <strong style="margin-left:6px">${correctAnswer || 'Nao informada'}</strong>`;
+        feedback.style.display = 'flex';
+      }
+    });
+
+    container.dataset.boundExercises = 'true';
+  }
+}
+
+function renderQuizSafe(quizData) {
+  const safeQuiz = Array.isArray(quizData) ? quizData : [];
+  quizTotal = safeQuiz.length;
+  quizCorrect = 0;
+
+  const html = safeQuiz.map((q, i) => {
+    const opcoes = Array.isArray(q.opcoes) ? q.opcoes : [];
+    quizExplanations[i] = { correta: q.correta, explicacao: q.explicacao };
+    return `
+    <div class="exercise-item" id="quiz-item-${i}" style="margin-bottom:20px;">
+      <div class="exercise-number">${i + 1}</div>
+      <div class="exercise-question">${q.pergunta}</div>
+      <div class="quiz-options">
+        ${opcoes.map((opt, j) => `
+          <button class="quiz-option" id="quiz-opt-${i}-${j}"
+            data-action="quiz" data-q="${i}" data-opt="${j}">
+            <span class="option-letter">${['A','B','C','D'][j]}</span>
+            ${String(opt).replace(/^[A-D]\)\s*/, '')}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback-box" id="quiz-feedback-${i}"></div>
+    </div>`;
+  }).join('') || '<div class="exercise-item"><div class="exercise-question">Nenhum quiz foi retornado pela IA nesta analise.</div></div>';
+
+  const container = document.getElementById('quizContent');
+  container.innerHTML = html;
+
+  if (!container.dataset.boundQuiz) {
+    container.addEventListener('click', function(e) {
+      const btn = e.target.closest('[data-action="quiz"]');
+      if (!btn || btn.disabled) return;
+
+      const questionIdx = parseInt(btn.dataset.q, 10);
+      const selectedIdx = parseInt(btn.dataset.opt, 10);
+      const explanationData = quizExplanations[questionIdx] || { correta: 0, explicacao: 'Explicacao nao informada.' };
+      const correctIdx = explanationData.correta;
+      const explanation = explanationData.explicacao;
+
+      for (let j = 0; j < 4; j++) {
+        const optBtn = document.getElementById(`quiz-opt-${questionIdx}-${j}`);
+        if (optBtn) {
+          optBtn.disabled = true;
+          if (j === correctIdx) optBtn.classList.add('correct');
+          else if (j === selectedIdx && j !== correctIdx) optBtn.classList.add('wrong');
+        }
+      }
+
+      const feedback = document.getElementById(`quiz-feedback-${questionIdx}`);
+      const isCorrect = selectedIdx === correctIdx;
+
+      if (isCorrect) {
+        quizCorrect++;
+        feedback.className = 'feedback-box correct';
+        feedback.innerHTML = `Correto! ${explanation}`;
+        addStar();
+      } else {
+        feedback.className = 'feedback-box incorrect';
+        feedback.innerHTML = explanation;
+      }
+      feedback.style.display = 'flex';
+
+      updateQuizScore();
+    });
+
+    container.dataset.boundQuiz = 'true';
+  }
+}
+
+function renderTipsSafe(tips) {
+  const safeTips = Array.isArray(tips) ? tips : [];
+  const html = safeTips.map(tip => `
+    <div class="tip-item">
+      <span class="tip-icon">${tip.emoji}</span>
+      <div class="tip-text">
+        <strong>${tip.titulo}</strong>
+        ${tip.texto}
+      </div>
+    </div>
+  `).join('') || '<div class="tip-item"><span class="tip-icon">💡</span><div class="tip-text"><strong>Sem dicas adicionais</strong>Revise a atividade com o aluno e incentive que ele explique o que aprendeu.</div></div>';
+
+  document.getElementById('tipsContent').innerHTML = html;
+}
+
+function savePDFSafe() {
+  const btn = document.getElementById('savePdfBtn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Gerando PDF...';
+  btn.disabled = true;
+
+  const explanationHTML = document.getElementById('explanationContent').innerHTML;
+  const exercisesHTML = document.getElementById('exercisesContent').innerHTML;
+  const quizHTML = document.getElementById('quizContent').innerHTML;
+  const tipsHTML = document.getElementById('tipsContent').innerHTML;
+
+  const pdfContent = `
+    <div style="font-family: Arial, sans-serif; color:#1a202c; width:100%; max-width:190mm; margin:0 auto; background:#ffffff; box-sizing:border-box;">
+      <div style="background:linear-gradient(135deg,#fff7ed 0%,#ffffff 55%,#eff6ff 100%); border:2px solid #E2E8F0; border-radius:22px; padding:22px 22px 18px; margin-bottom:18px;">
+        <div style="display:inline-block; padding:6px 12px; border-radius:999px; background:#1D4ED8; color:#ffffff; font-size:11px; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:10px;">LM EduKids</div>
+        <div style="font-size:28px; font-weight:900; color:#1D4ED8; margin-bottom:6px;">Relatorio de aprendizagem</div>
+        <div style="font-size:13px; color:#667085; line-height:1.6;">Resumo da analise da atividade com explicacao, exercicios, quiz e orientacoes para acompanhamento.</div>
+      </div>
+      <div style="border:1px solid #E2E8F0; border-top:6px solid #1D4ED8; border-radius:20px; padding:18px; margin-bottom:14px; page-break-inside:avoid;">
+        <div style="font-size:18px; font-weight:800; color:#111827; margin-bottom:12px;">Explicacao</div>
+        <div style="font-size:13px; line-height:1.7; color:#1f2937;">${explanationHTML}</div>
+      </div>
+      <div style="border:1px solid #E2E8F0; border-top:6px solid #F59E0B; border-radius:20px; padding:18px; margin-bottom:14px; page-break-inside:avoid;">
+        <div style="font-size:18px; font-weight:800; color:#111827; margin-bottom:12px;">Exercicios</div>
+        <div style="font-size:13px; line-height:1.7; color:#1f2937;">${exercisesHTML}</div>
+      </div>
+      <div style="border:1px solid #E2E8F0; border-top:6px solid #7C3AED; border-radius:20px; padding:18px; margin-bottom:14px; page-break-inside:avoid;">
+        <div style="font-size:18px; font-weight:800; color:#111827; margin-bottom:12px;">Quiz</div>
+        <div style="font-size:13px; line-height:1.7; color:#1f2937;">${quizHTML}</div>
+      </div>
+      <div style="border:1px solid #E2E8F0; border-top:6px solid #0EA5E9; border-radius:20px; padding:18px; margin-bottom:14px; page-break-inside:avoid;">
+        <div style="font-size:18px; font-weight:800; color:#111827; margin-bottom:12px;">Dicas para a familia</div>
+        <div style="font-size:13px; line-height:1.7; color:#1f2937;">${tipsHTML}</div>
+      </div>
+      <div style="text-align:center; margin-top:20px; padding-top:12px; border-top:1px solid #E2E8F0; font-size:11px; color:#98A2B3;">
+        LM EduKids • Relatorio gerado em ${new Date().toLocaleDateString('pt-BR')}
+      </div>
+    </div>
+  `;
+
+  const elemento = document.createElement('div');
+  elemento.style.position = 'fixed';
+  elemento.style.inset = '0';
+  elemento.style.background = '#ffffff';
+  elemento.style.padding = '10mm';
+  elemento.style.zIndex = '2147483647';
+  elemento.style.pointerEvents = 'none';
+  elemento.innerHTML = pdfContent;
+  document.body.appendChild(elemento);
+
+  const pdfRoot = elemento.firstElementChild;
+
+  setTimeout(() => {
+    html2pdf().set({
+      margin: [0, 0, 0, 0],
+      filename: 'LMEduKids-Aula.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    }).from(pdfRoot).save().then(() => {
+      document.body.removeChild(elemento);
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }).catch(() => {
+      document.body.removeChild(elemento);
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      alert('Erro ao gerar PDF. Tente novamente.');
+    });
+  }, 80);
+}
+
+renderResults = renderResultsSafe;
+renderExplanation = renderExplanationSafe;
+renderExercises = renderExercisesSafe;
+renderQuiz = renderQuizSafe;
+renderTips = renderTipsSafe;
+savePDF = savePDFSafe;
