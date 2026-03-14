@@ -153,20 +153,6 @@ async function handleSignup() {
 }
 
 async function initLoginPage() {
-  try {
-    const config = await loadSupabaseConfig();
-    initSupabase(config);
-
-    const { user } = await getCurrentUser();
-    if (user) {
-      window.location.replace('/app');
-      return;
-    }
-  } catch (error) {
-    console.error('Erro ao inicializar login:', error);
-    setFeedback('Nao foi possivel carregar a autenticacao.', true);
-  }
-
   syncEmailFields(loadLastEmail());
 
   document.getElementById('loginForm').addEventListener('submit', async (event) => {
@@ -196,6 +182,20 @@ async function initLoginPage() {
     showLogin();
     syncEmailFields(loadLastEmail());
   });
+
+  try {
+    const config = await loadSupabaseConfig();
+    initSupabase(config);
+
+    const { user } = await getCurrentUser();
+    if (user) {
+      window.location.replace('/app');
+      return;
+    }
+  } catch (error) {
+    console.error('Erro ao inicializar login:', error);
+    setFeedback('Nao foi possivel carregar a autenticacao.', true);
+  }
 
   showLogin();
 }

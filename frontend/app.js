@@ -539,98 +539,6 @@ document.addEventListener('click', (event) => {
   const target = event.target;
   if (!(target instanceof Element)) return;
 
-  const modeButton = target.closest('.mode-btn');
-  if (modeButton?.dataset.mode) {
-    event.preventDefault();
-    switchMainMode(modeButton.dataset.mode);
-    return;
-  }
-
-  if (target.closest('#cameraBtn')) {
-    event.preventDefault();
-    triggerStudentUpload('fileInputCamera');
-    return;
-  }
-
-  if (target.closest('#galleryBtn')) {
-    event.preventDefault();
-    triggerStudentUpload('fileInputGallery');
-    return;
-  }
-
-  if (target.closest('#removeBtn')) {
-    event.preventDefault();
-    resetStudentTaskUI();
-    return;
-  }
-
-  if (target.closest('#analyzeBtn')) {
-    event.preventDefault();
-    analyzeTask();
-    return;
-  }
-
-  if (target.closest('#newTaskBtn')) {
-    event.preventDefault();
-    resetStudentTaskUI();
-    return;
-  }
-
-  if (target.closest('#savePdfBtn')) {
-    event.preventDefault();
-    savePDF();
-    return;
-  }
-
-  if (target.closest('#profCameraBtn')) {
-    event.preventDefault();
-    triggerProfessorUpload('profInputCamera');
-    return;
-  }
-
-  if (target.closest('#profGalleryBtn')) {
-    event.preventDefault();
-    triggerProfessorUpload('profInputGallery');
-    return;
-  }
-
-  if (target.closest('#profRemoveBtn')) {
-    event.preventDefault();
-    resetProfessorTaskUI();
-    return;
-  }
-
-  if (target.closest('#profBackBtn1')) {
-    event.preventDefault();
-    showProfTela(1);
-    return;
-  }
-
-  if (target.closest('#profBackBtn2')) {
-    event.preventDefault();
-    showProfTela(2);
-    return;
-  }
-
-  if (target.closest('#profNextBtn2')) {
-    event.preventDefault();
-    showProfTela(3);
-    return;
-  }
-
-  if (target.closest('#profNewAdaptBtn')) {
-    event.preventDefault();
-    document.querySelectorAll('.adapt-btn').forEach((b) => b.classList.remove('selected'));
-    showProfTela(3);
-    return;
-  }
-
-  if (target.closest('#profNewActivityBtn')) {
-    event.preventDefault();
-    resetProfessorTaskUI();
-    return;
-  }
-
   const profileButton = target.closest('#btnProfile');
   if (profileButton) {
     event.preventDefault();
@@ -1754,7 +1662,7 @@ function normalizeStudentAnalysisSafe(data = {}) {
 }
 
 function renderResultsSafe(data) {
-  const normalized = normalizeStudentAnalysis(data);
+  const normalized = normalizeStudentAnalysisSafe(data);
 
   document.getElementById('uploadCard').style.display = 'none';
   document.getElementById('results').style.display = 'block';
@@ -2019,3 +1927,10 @@ function savePDFSafe() {
     });
   }, 80);
 }
+
+renderResults = renderResultsSafe;
+renderExplanation = renderExplanationSafe;
+renderExercises = renderExercisesSafe;
+renderQuiz = renderQuizSafe;
+renderTips = renderTipsSafe;
+savePDF = savePDFSafe;
