@@ -23,24 +23,24 @@
     <h2 id="authTitle">Entrar</h2>
     <p id="authFeedback" style="min-height:20px;margin:0 0 12px;text-align:center;font-size:14px;"></p>
 
-    <div id="loginForm">
+    <form id="loginForm">
       <label for="authEmail">Email</label>
-      <input id="authEmail" type="email" placeholder="Email">
+      <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
       <label for="authPassword">Senha</label>
-      <input id="authPassword" type="password" placeholder="Senha">
-      <button id="btnAuthAction">Entrar</button>
+      <input id="authPassword" type="password" placeholder="Senha" autocomplete="current-password">
+      <button id="btnAuthAction" type="submit">Entrar</button>
       <p>Não tem conta? <a href="#" id="linkShowSignup">Registrar</a></p>
-    </div>
+    </form>
 
-    <div id="signupForm" style="display:none;">
+    <form id="signupForm" style="display:none;">
       <label for="signupName">Nome completo</label>
-      <input id="signupName" type="text" placeholder="Nome completo">
+      <input id="signupName" type="text" placeholder="Nome completo" autocomplete="name">
       <label for="signupEmail">Email</label>
-      <input id="signupEmail" type="email" placeholder="Email">
+      <input id="signupEmail" type="email" placeholder="Email" autocomplete="email">
       <label for="signupWhatsapp">Tel. WhatsApp</label>
       <input id="signupWhatsapp" type="tel" placeholder="Tel. WhatsApp" inputmode="tel" autocomplete="tel">
       <label for="signupPassword">Senha</label>
-      <input id="signupPassword" type="password" placeholder="Senha">
+      <input id="signupPassword" type="password" placeholder="Senha" autocomplete="new-password">
       <label for="signupRole">Perfil</label>
       <select id="signupRole">
         <option value="student">Aluno</option>
@@ -49,11 +49,11 @@
         <option value="teacher">Mãe</option>
         <option value="teacher">Responsável</option>
       </select>
-      <label for="signupGrade">Série</label>
-      <input id="signupGrade" type="number" placeholder="Série (1-9)" min="1" max="9">
-      <button id="btnSignupAction">Registrar</button>
+      <label for="signupGrade">Ano</label>
+      <input id="signupGrade" type="number" placeholder="Ano (1-9)" min="1" max="9">
+      <button id="btnSignupAction" type="submit">Registrar</button>
       <p>Já tem conta? <a href="#" id="linkShowLogin">Entrar</a></p>
-    </div>
+    </form>
   </section>
 </main>
 
