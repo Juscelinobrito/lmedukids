@@ -51,10 +51,10 @@
 <!-- ── Seletor de Modo ──────────────────────────────────────────── -->
 <div class="mode-switcher-wrap">
   <div class="mode-switcher" id="modeSwitcher">
-    <button class="mode-btn active" id="btnModeAluno" data-mode="aluno">
+    <button class="mode-btn active" id="btnModeAluno" data-mode="aluno" type="button" onclick="document.getElementById('modoAluno').style.display='';document.getElementById('modoProfessor').style.display='none';document.getElementById('btnModeAluno').classList.add('active');document.getElementById('btnModeProfessor').classList.remove('active');">
       🎒 <span>Modo Aluno</span>
     </button>
-    <button class="mode-btn" id="btnModeProfessor" data-mode="professor">
+    <button class="mode-btn" id="btnModeProfessor" data-mode="professor" type="button" onclick="document.getElementById('modoAluno').style.display='none';document.getElementById('modoProfessor').style.display='';document.getElementById('btnModeProfessor').classList.add('active');document.getElementById('btnModeAluno').classList.remove('active');">
       👩‍🏫 <span>Modo Professor</span>
     </button>
   </div>
@@ -104,12 +104,12 @@
         <div class="upload-text">Como deseja enviar a tarefa?</div>
         <div class="upload-subtext" style="margin-bottom:20px">Foto do livro, caderno ou folha de exercício</div>
         <div class="upload-btn-row">
-          <button class="upload-choice-btn camera-btn" id="cameraBtn">
+          <button class="upload-choice-btn camera-btn" id="cameraBtn" type="button" onclick="document.getElementById('fileInputCamera')?.click()">
             <span class="choice-icon">📷</span>
             <span class="choice-label">Tirar Foto</span>
             <span class="choice-sub">Câmera</span>
           </button>
-          <button class="upload-choice-btn gallery-btn" id="galleryBtn">
+          <button class="upload-choice-btn gallery-btn" id="galleryBtn" type="button" onclick="document.getElementById('fileInputGallery')?.click()">
             <span class="choice-icon">🖼️</span>
             <span class="choice-label">Escolher Arquivo</span>
             <span class="choice-sub">Galeria ou Pasta</span>
@@ -257,12 +257,12 @@
         <div class="upload-text">Como deseja enviar a atividade?</div>
         <div class="upload-subtext" style="margin-bottom:20px">Texto do livro, folha de prova, exercício do caderno...</div>
         <div class="upload-btn-row">
-          <button class="upload-choice-btn camera-btn" id="profCameraBtn">
+          <button class="upload-choice-btn camera-btn" id="profCameraBtn" type="button" onclick="document.getElementById('profInputCamera')?.click()">
             <span class="choice-icon">📷</span>
             <span class="choice-label">Tirar Foto</span>
             <span class="choice-sub">Câmera</span>
           </button>
-          <button class="upload-choice-btn gallery-btn" id="profGalleryBtn">
+          <button class="upload-choice-btn gallery-btn" id="profGalleryBtn" type="button" onclick="document.getElementById('profInputGallery')?.click()">
             <span class="choice-icon">🖼️</span>
             <span class="choice-label">Escolher Arquivo</span>
             <span class="choice-sub">Galeria ou Pasta</span>
@@ -498,7 +498,25 @@
   </div>
 </div>
 
+<div id="runtimeDebugPanel" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;background:#2b1735;color:#fff;padding:12px 14px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.25);font:12px/1.5 monospace;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  (function () {
+    const panel = document.getElementById('runtimeDebugPanel');
+    function showRuntimeError(message) {
+      if (!panel) return;
+      panel.style.display = 'block';
+      panel.textContent = 'Erro JS detectado: ' + message;
+    }
+    window.addEventListener('error', function (event) {
+      showRuntimeError(event.message || 'Erro desconhecido');
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+      const reason = event.reason;
+      showRuntimeError(reason && reason.message ? reason.message : String(reason));
+    });
+  })();
+</script>
 <script type="module" src="app.js"></script>
 </body>
 </html>
