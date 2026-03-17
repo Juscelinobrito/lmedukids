@@ -498,25 +498,7 @@
   </div>
 </div>
 
-<div id="runtimeDebugPanel" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;background:#2b1735;color:#fff;padding:12px 14px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.25);font:12px/1.5 monospace;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-  (function () {
-    const panel = document.getElementById('runtimeDebugPanel');
-    function showRuntimeError(message) {
-      if (!panel) return;
-      panel.style.display = 'block';
-      panel.textContent = 'Erro JS detectado: ' + message;
-    }
-    window.addEventListener('error', function (event) {
-      showRuntimeError(event.message || 'Erro desconhecido');
-    });
-    window.addEventListener('unhandledrejection', function (event) {
-      const reason = event.reason;
-      showRuntimeError(reason && reason.message ? reason.message : String(reason));
-    });
-  })();
-</script>
 <script type="module" src="app.js"></script>
 </body>
 </html>
